@@ -940,7 +940,7 @@ function refreshCompare() {
   const slot = mode === 'practice' ? null : slotFor(mode);
   const live = slot && slot.live && liveLine(won, n, slot.live);
   document.getElementById('resultCompare').textContent = live || compareLine(won, n, game.answer);
-  document.getElementById('resultSource').textContent = live ? `Based on ${slot.live.count.toLocaleString()} players so far` : (mode === 'practice' ? '' : 'Estimated from word difficulty');
+  const src = document.getElementById('resultSource'); src.textContent = live ? `Based on ${slot.live.count.toLocaleString()} players so far` : ''; src.hidden = !live;
 }
 
 /* ---------- Sheets ---------- */
