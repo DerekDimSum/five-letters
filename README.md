@@ -7,7 +7,10 @@ WebView, with one small serverless function behind it for the "how you compared"
 
 | Path | What it is |
 |---|---|
-| `index.html` | The whole game: markup, styles, logic and the embedded word pack. No build step. |
+| `index.html` | The whole game: markup, styles and logic. No build step. |
+| `packs/` | Word lists, one JSON file per language, plus `index.json` listing them. The game fetches these at load. |
+| `scripts/build-packs.py` | Rebuilds `packs/` from the system dictionary and word-frequency data, with solver-based difficulty scores. |
+| `HOST-BRIDGE.md` | The interface a super app implements: storage, haptics, share, clock, analytics. |
 | `api/stats.js` | Vercel serverless function. Aggregates results per puzzle so the end screen can say "Faster than 62% of players". |
 | `scripts/dev-server.js` | Local server that serves the game and runs the API against an in-memory store. |
 | `WORD-PACK-SPEC.md` | Requirements for building real word packs (English and other languages). |
@@ -49,21 +52,22 @@ look gamed, put the route behind Vercel's firewall rules or add a per-IP cap.
 
 ## Word packs
 
-The game ships with a small placeholder pack. Replace the JSON inside
-`<script id="wordpack" type="application/json">` in `index.html` with a real pack. See
-`WORD-PACK-SPEC.md` for the format and the rules for each list.
+Packs live in `packs/<id>.json` and are listed in `packs/index.json`; players pick one in
+settings. English is built from common words validated against the macOS dictionary. Malay,
+Indonesian and Filipino are frequency-only lists marked **beta** until a native speaker reviews
+them. To rebuild:
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install wordfreq && .venv/bin/python scripts/build-packs.py
+```
+
+See `WORD-PACK-SPEC.md` for the format and the rules for each list.
 
 ## Super app integration
 
-Everything that touches the outside world goes through the `Host` object at the top of the
-script in `index.html`: storage, haptics, share and the clock. Replace those four methods with
-the host's JS bridge calls and nothing else changes.
-
-Haptics already look for a bridge before falling back: if the host injects
-`window.FiveLettersHost = { haptic(kind) {...} }` the game calls it with `tap`, `tick`, `error`
-or `success`. Without a bridge it uses the Vibration API on Android and, on iOS Safari 17.4+,
-the system tap that toggling a switch-style checkbox produces. Players can turn haptics off in
-settings. Theme follows the system by default and
+Inject `window.FiveLettersHost` before the game script and the game routes storage, haptics,
+share, the clock and analytics through it. Every method is optional. The full contract, haptic
+kinds and the analytics event list are in `HOST-BRIDGE.md`. Theme follows the system by default and
 can be forced with `data-theme="light|dark"` on the root element.
 
 If the game is served from a different origin than the API, set `STATS_API` in `index.html` to
@@ -82,3 +86,7 @@ the full URL. The function already sends permissive CORS headers.
   unused-letters strip.
 - No onboarding popup. A one-line hint under the empty grid, a colour legend after the first
   reveal, and one sentence on the first end screen; each shows once.
+- Share card: a rendered PNG with the grid, result and comparison line, sent through the host
+  or the Web Share API, with text and clipboard fallbacks.
+- Accessible: reveals are announced to screen readers, keys describe their state, sheets trap
+  and restore focus.

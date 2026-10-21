@@ -1,9 +1,17 @@
 # Word pack requirements
 
-A word pack is one JSON object. The game ships with a small placeholder pack embedded in
-`five-letters.html` inside `<script id="wordpack" type="application/json">`. To install a
-real pack, replace the contents of that script block with the pack JSON. Nothing else
-changes. Each language or theme is its own pack file, named `wordpack.<id>.json`.
+A word pack is one JSON file in `packs/`, named `<id>.json`, and listed in `packs/index.json`:
+
+```json
+[
+  { "id": "en", "name": "English", "language": "en", "file": "packs/en.json" },
+  { "id": "ms", "name": "Bahasa Melayu", "language": "ms", "file": "packs/ms.json", "beta": true }
+]
+```
+
+The first entry is the default. `beta: true` shows a "(beta)" tag in the language picker.
+`scripts/build-packs.py` generates the current packs; a hand-built pack just needs to follow
+the schema below and be added to the manifest.
 
 ## Schema
 

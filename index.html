@@ -94,6 +94,9 @@ main { flex: 1 1 auto; display: flex; flex-direction: column; align-items: cente
 .summary b { display: block; font: 700 1.5rem var(--font-display); font-variant-numeric: tabular-nums; line-height: 1.1; }
 .summary span { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
 .linkbtn { display: block; width: 100%; text-align: center; margin-top: 14px; color: var(--accent); font-weight: 600; padding: 8px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.panel:focus { outline: none; }
+.setting select { font: inherit; background: var(--key); color: var(--fg); border: 0; border-radius: 8px; padding: 8px 10px; max-width: 46%; }
 .ios-haptic { position: fixed; left: -9999px; top: 0; width: 1px; height: 1px; overflow: hidden; opacity: 0.01; pointer-events: none; }
 .board { display: grid; grid-template-rows: repeat(6, var(--tile)); gap: 5px; touch-action: pan-y; }
 .row { display: grid; grid-template-columns: repeat(5, var(--tile)); gap: 5px; }
@@ -244,7 +247,7 @@ main { flex: 1 1 auto; display: flex; flex-direction: column; align-items: cente
 
   <main>
     <div class="board" id="board" role="grid" aria-label="Guess grid"></div>
-    <div class="coach" id="coach" hidden></div>
+    <div class="coach" id="coach" aria-live="polite" hidden></div>
   </main>
 
   <div class="unused" id="unused" hidden></div>
@@ -252,9 +255,10 @@ main { flex: 1 1 auto; display: flex; flex-direction: column; align-items: cente
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div id="announce" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
 <div class="sheet" id="statsSheet" hidden>
-  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="statsTitle">
+  <div class="panel" role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="statsTitle">
     <button class="icon-btn close" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <div id="resultBlock" hidden>
       <p class="eyebrow" id="resultEyebrow"></p>
@@ -293,7 +297,7 @@ main { flex: 1 1 auto; display: flex; flex-direction: column; align-items: cente
 </div>
 
 <div class="sheet" id="settingsSheet" hidden>
-  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <div class="panel" role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="settingsTitle">
     <button class="icon-btn close" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2 id="settingsTitle">Settings</h2>
     <div class="setting">
@@ -321,14 +325,15 @@ main { flex: 1 1 auto; display: flex; flex-direction: column; align-items: cente
       </div>
     </div>
     <div class="setting">
-      <div class="label"><span>Word pack</span><small id="packInfo"></small></div>
+      <div class="label"><span>Language</span><small id="packInfo"></small></div>
+      <select id="optPack" aria-label="Word list language"></select>
     </div>
     <p class="note" style="margin-top:14px">Animations follow your device's reduce-motion setting.</p>
   </div>
 </div>
 
 <div class="sheet" id="archiveSheet" hidden>
-  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="archiveTitle">
+  <div class="panel" role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="archiveTitle">
     <button class="icon-btn close" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2 id="archiveTitle">Archive</h2>
     <p class="note">Replay any past puzzle. Archive games don't count toward your streak or stats.</p>
@@ -337,7 +342,7 @@ main { flex: 1 1 auto; display: flex; flex-direction: column; align-items: cente
 </div>
 
 <div class="sheet" id="helpSheet" hidden>
-  <div class="panel help" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="panel help" role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="helpTitle">
     <button class="icon-btn close" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2 id="helpTitle">How to play</h2>
     <p>Guess the five-letter word in six tries.</p>
@@ -354,34 +359,21 @@ main { flex: 1 1 auto; display: flex; flex-direction: column; align-items: cente
   </div>
 </div>
 
-<script id="wordpack" type="application/json">
-{
-  "id": "en-placeholder",
-  "name": "English (placeholder)",
-  "language": "en",
-  "version": 1,
-  "wordLength": 5,
-  "alphabet": "abcdefghijklmnopqrstuvwxyz",
-  "keyboard": [
-    "qwertyuiop",
-    "asdfghjkl",
-    "zxcvbnm"
-  ],
-  "epoch": "2026-10-21",
-  "answers": "about above abuse actor acute admit adopt adult after again agent agree ahead alarm album alert alike alive allow alone along alter among anger angle angry apart apple apply arena argue arise aside asset audio avoid award aware badly baker basic beach began begin begun being below bench birth black blame blind block blood board boost booth bound brain brand bread break breed brief bring broad broke brown build built buyer cable carry catch cause chain chair chart chase cheap check chest chief child chose civil claim class clean clear click clock close coach coast could count court cover craft crash cream crime cross crowd crown curve cycle daily dance dated dealt death debut delay depth doing doubt dozen draft drama drawn dream dress drink drive drove dying eager early earth eight elite empty enemy enjoy enter entry equal error event every exact exist extra faith false fault fiber field fifth fifty fight final first fixed flash fleet floor fluid focus force forth forty forum found frame frank fraud fresh front fruit fully funny giant given glass globe going grace grade grand grant grass great green gross group grown guard guess guest guide happy heart heavy hence horse hotel house human ideal image index inner input issue joint judge known label large laser later laugh layer learn lease least leave legal level light limit local logic loose lower lucky lunch lying magic major maker march match maybe mayor meant media metal might minor minus mixed model money month moral motor mount mouse mouth movie music never newly night noise north noted novel nurse occur ocean offer often order other ought paint panel paper party peace phase phone photo piece pilot pitch place plain plane plant plate point pound power press price pride prime print prior prize proof proud prove queen quick quiet quite radio raise range rapid ratio reach ready refer right rival river rough round route royal rural scale scene scope score sense serve seven shall shape share sharp sheet shelf shell shift shirt shock shoot short shown sight since sixth sixty skill sleep slide small smart smile smoke solid solve sorry sound south space spare speak speed spend spent split spoke sport staff stage stake stand start state steam steel stick still stock stone stood store storm story strip stuck study stuff style sugar suite super sweet table taken taste teach teeth thank theft theme there these thick thing think third those three threw throw tight tired title today topic total touch tough tower track trade train treat trend trial tried truck truly trust truth twice under union unity until upper upset urban usage usual valid value video virus visit vital voice waste watch water wheel where which while white whole whose woman women world worry worse worst worth would wound write wrong wrote yield young youth",
-  "guesses": "abbey abide abode abort acorn adage adept affix agile aisle allot alloy aloft aloud alpha altar amber amend amiss ample amuse ankle annex apron arbor armor aroma arrow ashen askew atlas attic aunty avert awake awful awoke axiom azure bacon badge bagel balmy banal banjo barge baron basil baste batch bathe baton beady beard beast beech beefy befit belch belly berry berth bevel bible bicep bilge binge bingo biome birch bison blade bland blank blare blast blaze bleak bleat bleed blend bless blimp bliss blitz bloat blond bloom blown bluff blunt blurb blurt blush boast bonus boozy borax bosom bossy botch bough boxer brace braid brake brash brass brave bravo brawl brawn brick bride brine brink brisk broil brook broom broth brunt brush brute buddy budge buggy bugle bulge bulky bully bunch bunny burly burnt burst bushy butte cabal cabin cache cacti caddy cadet cagey cairn camel cameo canal candy canny canoe canon caper carat cargo carol carve caste cater caulk cease cedar cello chafe chaff chalk champ chant chaos chard charm cheat cheek cheer chess chick chide chili chill chime chirp choir choke chord chore chuck chump chunk churn chute cider cigar cinch circa civic clack clamp clang clank clash clasp cleat cleft clerk cliff climb cling clink cloak clone cloth cloud clout clove clown clump clung cobra cocoa colon color comet comfy comic comma conch condo conic copse coral corny couch cough coupe coven covet cower coyly crack cramp crane crank crass crate crave crawl craze crazy creak credo creed creek creep crepe crept cress crest crick cried crier crimp crisp croak crock crone crony crook crude cruel crumb crush crust crypt cubic cumin curio curly curry curse curvy cynic daisy dandy datum daunt decal decay decor decoy decry deity delta delve demon demur denim dense depot derby deter detox deuce devil diary dicey digit dimly diner dingo dingy diode dirge dirty disco ditch ditto ditty diver dizzy dodge dodgy dogma dolly donor donut dopey dowdy dowel downy dowry drain drake drank drape drawl dread dried drier drift drill droll drone drool droop dross drown druid drunk dryer dryly duchy dully dummy dumpy dunce dusky dusty dutch duvet dwarf dwell dwelt eagle easel eaten eater ebony edict edify eerie egret elbow elder elect elegy elfin elide elope elude email embed ember emcee enact endow ensue envoy epoch epoxy equip erase erect erode essay ether ethic ethos etude evade evict evoke exalt excel exert exile expel extol exult fable facet fairy fancy farce fatal fatty favor feast feign fella felon femur fence feral ferry fetal fetch fetid fever fewer fiend fiery filer filet filly filmy filth finch finer fishy fizzy fjord flack flail flair flake flaky flame flank flare flask fleck flesh flick flier fling flint flirt float flock flood flora floss flour flout flown fluff fluke flume flung flunk flush flute flyer foamy focal foggy foist folio folly foray forge forgo forte foyer frail freak freed freer frill frisk fritz frock frond frost froth frown froze fudge fugue fungi funky furor furry fussy fuzzy gaffe gaily gamer gamma gamut gassy gaudy gauge gaunt gauze gavel gawky gecko geeky geese genie genre ghost ghoul giddy girly girth giver glade gland glare glaze gleam glean glide glint gloat gloom glory gloss glove glyph gnash gnome godly golem golly goner goody gooey goofy goose gorge gouge gourd graft grail grain grape graph grasp grate grave gravy graze greed greet grief grill grime grimy grind gripe groan groin groom grope grout grove growl gruel gruff grunt guava guild guile guilt guise gulch gully gumbo gummy guppy gusto gusty habit hairy halve handy hardy harem harpy harsh haste hasty hatch hater haunt haute haven havoc hazel heady heard heath heave hedge hefty heist helix hello heron hilly hinge hippo hippy hoard hobby hoist holly homer honey honor horde hotly hound hover howdy humid humor humus hunch hunky hurry husky hutch hydro hyena hyper icily icing idiom idiot idler idyll igloo imbue impel imply inane inbox incur inept inert infer ingot inlay inlet inter intro ionic irate irony islet itchy ivory jaunt jazzy jelly jerky jetty jewel jiffy jolly joust juice juicy jumbo jumpy junta juror kappa karma kayak kebab khaki kinky kiosk kitty knack knave knead kneel knelt knife knock knoll koala krill lager lance lanky lapel lapse larva lasso latch latte leafy leaky leant leapt ledge leech leery lefty leggy lemon lemur leper lever libel liege liken lilac limbo linen liner lingo lipid lithe liver llama loamy loath lobby locus lodge lofty lousy lover lowly lumen lumpy lunar lunge lurch lurid lusty lymph lyric macaw macho macro madam madly mafia mambo manga mange mango mangy mania manic manly manor maple marry marsh mason matey mauve maxim mealy medal melee melon mercy merge merit merry metro micro midge midst mimic mince miner minim minty mirth miser mocha modal modem mogul moist molar moldy mossy motel motif motto moult mound mourn mower mucky mucus muddy mulch mummy munch mural murky mushy musky musty myrrh nadir naive nanny nasal nasty natal naval navel needy neigh nerdy nerve newer nicer niche niece ninja ninny ninth noble nobly noisy nomad noose nudge nutty nylon nymph oaken obese octal octet odder oddly offal olden older olive ombre omega onion onset opera opine opium optic orbit organ otter ounce outdo outer outgo ovary ovate overt ovine ovoid owing owner oxide ozone paddy pagan palsy pansy papal parer parka parry parse paste pasty patch patio patsy patty pause payee payer peach pearl pecan pedal penal pence penne penny perch peril perky pesky pesto petal petty phony piano picky piety piggy pinch piney pinky pinto piper pique pithy pivot pixel pixie pizza plaid plait plank plaza plead pleat plied plier pluck plumb plume plump plunk plush poesy poker polar polka polyp pooch poppy porch poser posit posse pouch pouty prank prawn preen prick pried prism privy probe prone prong prose prowl proxy prude prune psalm pudgy puffy pulpy pulse punch pupil puppy puree purer purge purse pushy putty pygmy quack quail quake qualm quark quart quash quasi quell query quest queue quill quilt quirk quota quote quoth rabbi rabid racer radar radii rainy rally ramen ranch randy rarer raspy raven rayon razor rebar rebel rebus rebut recap recur reedy refit regal rehab reign relax relay relic remit renal renew repay repel reply rerun reset resin retch retro retry reuse revel revue rhino rhyme rider ridge rifle rigid rigor rinse ripen riper risen riser risky roach roast robot rocky rodeo rogue roomy roost rotor rouge rover rowdy rower ruddy ruder rugby ruler rumba rumor rupee rusty sadly safer saint salad sally salon salsa salty salve salvo sandy saner sappy sassy satin satyr sauce saucy sauna saute savor savvy scald scalp scaly scamp scant scare scarf scary scent scion scoff scold scone scoop scorn scour scout scowl scram scrap scree screw scrub scrum scuba sedan seedy segue seize sepia serif serum setup sever sewer shack shade shady shaft shake shaky shale shame shank shard shave shawl shear sheen sheep sheer sheik shied shine shiny shire shirk shoal shone shook shore shout shove showy shrew shrub shrug shuck shunt shush shyly siege sieve sigma silky silly sinew singe siren sissy skate skier skiff skimp skirt skulk skull skunk slack slain slang slant slash slate slave sleek sleet slept slice slick slime slimy sling slink sloop slope slosh sloth slump slung slunk slurp slush slyly smack smash smear smell smelt smirk smite smock smoky smote snack snail snake snaky snare snarl sneak sneer snide sniff snipe snoop snore snort snout snowy snuck snuff soapy sober soggy solar sonar sonic sooth sooty sower spade spank spasm spawn spear speck spell spice spicy spied spiel spike spiky spill spilt spine spiny spire spite splat spoil spoof spook spool spoon spore spout spray spree sprig spunk spurn spurt squad squat squib stack staid stain stair stale stalk stall stamp stank stark stash stave stead steak stern stiff sting stink stint stoic stoke stomp stony stool stoop stout stove strap straw stray strum strut stung stunk stunt suave sulky sully sumac sunny surer surge surly sushi swami swamp swarm swash swath swear sweat sweep swell swept swift swill swine swing swirl swish swoon swoop sword swore sworn swung synod syrup tabby tacit tacky taffy taint talon tamer tango tangy taper tapir tardy tarot tatty taunt tawny tease teddy tenet tenor tense tenth tepee tepid terse testy thief thigh thong thorn thrum thumb thump thyme tiara tibia tidal tiger tilde timer timid tipsy titan tithe toady toast toddy token tonal tonic tooth topaz torch torso torus totem toxic toxin trace tract tramp trash trawl tread triad tribe trice trick tripe trite troll troop trope trout trove truce truer trump trunk truss tryst tubal tuber tulip tulle tumor tunic turbo tutor twang tweak tweed tweet twirl twist twixt tying udder ulcer ultra umbra uncle uncut unfed unfit unify unlit unmet unset untie unwed unzip upend usher using usurp utile utter vague valet valor valve vapid vapor vault vaunt vegan venom venue verge verse verso verve vicar vigil vigor villa vinyl viola viper viral visor vista vivid vixen vocal vodka vogue vomit vouch vowel vying wacky wafer wager wagon waist waive waltz warty weary weave wedge weedy weigh weird welch welsh wench whack whale wharf wheat whelp whiff whine whiny whirl whisk whoop widen wider widow width wield wight wimpy wince winch windy wiser wispy witch witty woken wooer woody wooly woozy wordy wormy wrack wrath wreak wreck wrest wring wrist wryly yacht yearn yeast yokel zebra zesty zonal"
-}
-</script>
-
 <script>
-(() => {
+(async () => {
 'use strict';
 
 /* ---------- Host adapter: the only place that talks to the outside world ---------- */
+// The super app injects window.FiveLettersHost before this script runs. See HOST-BRIDGE.md.
+const Bridge = (typeof window.FiveLettersHost === 'object' && window.FiveLettersHost) || null;
+const DEBUG = /[?&]debug\b/.test(location.search);
 const Host = {
   storage: {
-    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
-    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+    get(k) { try { if (Bridge && Bridge.storage) return Bridge.storage.get(k); return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { if (Bridge && Bridge.storage) return Bridge.storage.set(k, v); localStorage.setItem(k, v); } catch (e) {} },
+  },
+  track(event, props) {
+    try { if (Bridge && typeof Bridge.track === 'function') Bridge.track(event, props || {}); else if (DEBUG) console.log('[track]', event, props || {}); } catch (e) {}
   },
   hapticsEnabled: true,
   // kind: 'tap' (keys, tiles), 'tick' (a reveal landing), 'error' (rejected guess, loss), 'success' (win)
@@ -389,8 +381,7 @@ const Host = {
     if (!Host.hapticsEnabled) return;
     try {
       // 1. Super app bridge, when the host injects one.
-      const bridge = window.FiveLettersHost;
-      if (bridge && typeof bridge.haptic === 'function') { bridge.haptic(kind); return; }
+      if (Bridge && typeof Bridge.haptic === 'function') { Bridge.haptic(kind); return; }
       // 2. Vibration API (Android browsers and WebViews).
       if (typeof navigator.vibrate === 'function' && /Android/i.test(navigator.userAgent)) {
         navigator.vibrate(kind === 'error' ? [30, 40, 30] : kind === 'success' ? [20, 40, 20, 40, 60] : kind === 'tick' ? 12 : 6);
@@ -400,8 +391,19 @@ const Host = {
       iosHaptic(kind);
     } catch (e) {}
   },
-  async share(text) {
+  // payload: { text, blob (PNG share card or null), filename }
+  async share({ text, blob, filename }) {
     try {
+      if (Bridge && typeof Bridge.share === 'function') {
+        const image = blob ? await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(blob); }) : null;
+        await Bridge.share({ text, image }); return 'shared';
+      }
+    } catch (e) { if (e && e.name === 'AbortError') return 'cancelled'; }
+    try {
+      if (blob && navigator.share && navigator.canShare) {
+        const file = new File([blob], filename || 'five-letters.png', { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], text }); return 'shared'; }
+      }
       if (navigator.share) { await navigator.share({ text }); return 'shared'; }
     } catch (e) { if (e && e.name === 'AbortError') return 'cancelled'; }
     try { await navigator.clipboard.writeText(text); return 'copied'; } catch (e) {}
@@ -413,7 +415,7 @@ const Host = {
       return ok ? 'copied' : 'failed';
     } catch (e) { return 'failed'; }
   },
-  now() { return new Date(); },
+  now() { try { if (Bridge && typeof Bridge.now === 'function') return new Date(Bridge.now()); } catch (e) {} return new Date(); },
 };
 
 let iosSwitch = null;
@@ -464,13 +466,31 @@ function normalizePack(raw) {
   const freq = {}; for (const w of answers) for (const c of new Set(w)) freq[c] = (freq[c] || 0) + 1;
   for (const c in freq) freq[c] /= answers.length;
   return {
-    id: raw.id || 'pack', name: raw.name || 'Words', version: raw.version || 1, L,
+    id: raw.id || 'pack', name: raw.name || 'Words', version: raw.version || 1, L, beta: !!raw.beta,
     alphabet: [...raw.alphabet], keyboard: raw.keyboard, epoch: raw.epoch,
     order, valid, extraCount: extra.length, difficulty: raw.difficulty || {}, freq,
   };
 }
 
-const PACK = normalizePack(JSON.parse(document.getElementById('wordpack').textContent));
+const PACK_PREF_KEY = 'fiveletters.pack';
+async function loadPackJson() {
+  let manifest = [];
+  try { manifest = await (await fetch('packs/index.json')).json(); } catch (e) {}
+  if (!Array.isArray(manifest) || !manifest.length) manifest = [{ id: 'en', name: 'English', language: 'en', file: 'packs/en.json' }];
+  const wanted = Host.storage.get(PACK_PREF_KEY);
+  const entry = manifest.find(m => m.id === wanted) || manifest[0];
+  const raw = await (await fetch(entry.file)).json();
+  raw.beta = !!entry.beta;
+  return { raw, manifest };
+}
+let loaded;
+try { loaded = await loadPackJson(); }
+catch (e) {
+  const c = document.getElementById('coach'); c.hidden = false; c.textContent = 'Could not load the word list. Check your connection and reload.';
+  throw e;
+}
+const MANIFEST = loaded.manifest;
+const PACK = normalizePack(loaded.raw);
 const L = PACK.L, ROWS = 6;
 // Live comparison service. Same-origin by default; point at the deployed host when the game is served from elsewhere.
 const STATS_API = '/api/stats';
@@ -507,20 +527,24 @@ function defaultStore() {
     stats: { daily: Object.assign(emptyStats(), { freezes: 0, playedSinceFreeze: 0 }), practice: emptyStats() },
   };
 }
+const GLOBAL_SETTINGS_KEY = 'fiveletters.settings';   // settings follow the player across word packs
 function loadStore() {
   const base = defaultStore();
+  let res = base;
   try {
     const raw = Host.storage.get(STORE_KEY);
-    if (!raw) return base;
-    const s = JSON.parse(raw);
-    if (s.schema !== SCHEMA) return migrate(s, base);
-    // Shallow-merge so new fields added later get defaults.
-    return Object.assign(base, s, { settings: Object.assign(base.settings, s.settings), archive: s.archive || {}, stats: { daily: Object.assign(base.stats.daily, s.stats && s.stats.daily), practice: Object.assign(base.stats.practice, s.stats && s.stats.practice) } });
-  } catch (e) { return base; }
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (s.schema !== SCHEMA) res = migrate(s, base);
+      else res = Object.assign(base, s, { settings: Object.assign(base.settings, s.settings), archive: s.archive || {}, stats: { daily: Object.assign(base.stats.daily, s.stats && s.stats.daily), practice: Object.assign(base.stats.practice, s.stats && s.stats.practice) } });
+    }
+  } catch (e) { res = base; }
+  try { const g = JSON.parse(Host.storage.get(GLOBAL_SETTINGS_KEY) || 'null'); if (g) Object.assign(res.settings, g); } catch (e) {}
+  return res;
 }
 function migrate(old, base) { /* Future schema bumps map old fields here. */ return base; }
 const store = loadStore();
-function save() { Host.storage.set(STORE_KEY, JSON.stringify(store)); }
+function save() { Host.storage.set(STORE_KEY, JSON.stringify(store)); Host.storage.set(GLOBAL_SETTINGS_KEY, JSON.stringify(store.settings)); }
 
 /* ---------- Pure game logic ---------- */
 function score(guess, answer) {
@@ -616,7 +640,7 @@ function puzzleDate(n) { return new Date(epochMidnight() + (n - 1) * 86400000).t
 const boardEl = document.getElementById('board'), kbEl = document.getElementById('kb'), toastEl = document.getElementById('toast');
 const tiles = [];
 for (let r = 0; r < ROWS; r++) {
-  const row = document.createElement('div'); row.className = 'row'; row.setAttribute('role', 'row');
+  const row = document.createElement('div'); row.className = 'row'; row.setAttribute('role', 'row'); row.setAttribute('aria-label', `Guess ${r + 1}`);
   const rowTiles = [];
   for (let c = 0; c < L; c++) {
     const t = document.createElement('div'); t.className = 'tile'; t.setAttribute('role', 'gridcell'); t.style.setProperty('--i', c);
@@ -670,6 +694,7 @@ function render(restored) {
   for (const id in keyEls) {
     const k = keyEls[id]; if (id === 'enter' || id === 'backspace') continue;
     k.className = 'key' + (ks[id] ? ' ' + ks[id] : '') + (ks[id] === 'absent' && game.hardMode ? ' locked' : '');
+    k.setAttribute('aria-label', id.toUpperCase() + (ks[id] ? ', ' + STATE_WORDS[ks[id]] : ''));
   }
   renderCoach(ks);
   const un = document.getElementById('unused');
@@ -681,6 +706,8 @@ function render(restored) {
   void rm;
 }
 
+const STATE_WORDS = { correct: 'correct', present: 'in the word, wrong spot', absent: 'not in the word' };
+function announce(text) { const a = document.getElementById('announce'); a.textContent = ''; setTimeout(() => { a.textContent = text; }, 50); }
 function finishedAnyGame() { return (store.stats.daily.played + store.stats.practice.played) > 0; }
 function renderCoach() {
   const c = document.getElementById('coach');
@@ -731,8 +758,10 @@ function submit() {
   if (g.length < L) { toast('Not enough letters'); shakeRow(r); Host.haptic('error'); return; }
   if (!PACK.valid.has(g)) { toast('Not in word list'); shakeRow(r); Host.haptic('error'); return; }
   if (game.hardMode) { const v = hardModeViolation(g, game.guesses, game.answer); if (v) { toast(v); shakeRow(r); Host.haptic('error'); return; } }
+  if (game.guesses.length === 0) Host.track('game_start', { mode, puzzle: game.puzzle, pack: PACK.id });
   game.guesses.push(g); game.current = ''; cursor = null;
   const s = score(g, game.answer);
+  Host.track('guess_submit', { mode, n: game.guesses.length });
   const won = s.every(x => x === 'correct');
   game.status = won ? 'won' : (game.guesses.length >= ROWS ? 'lost' : 'playing');
   persistGame();
@@ -742,6 +771,7 @@ function submit() {
   const wait = rm ? 60 : (L - 1) * 140 + 560;
   setTimeout(() => {
     busy = false; render();
+    announce(`Guess ${r + 1}, ${g.toUpperCase().split('').join(' ')}: ` + s.map((st, i) => `${g[i].toUpperCase()} ${STATE_WORDS[st]}`).join(', ') + (won ? '. You solved it.' : game.status === 'lost' ? `. Out of guesses. The word was ${game.answer.toUpperCase()}.` : '.'));
     if (!won && game.status === 'playing') Host.haptic('tick');
     if (won) {
       Host.haptic('success');
@@ -762,6 +792,7 @@ function submit() {
 let lastNote = '';
 function finishGame(won, n) {
   finishedThisSession = true; lastNote = '';
+  Host.track('game_finish', { mode, won, guesses: game.guesses.length, puzzle: game.puzzle, pack: PACK.id });
   if (mode !== 'practice') reportResult(won ? n : 0);
   if (mode === 'archive') { save(); return; }
   const st = mode === 'daily' ? store.stats.daily : store.stats.practice;
@@ -840,14 +871,26 @@ function refreshCompare() {
 /* ---------- Sheets ---------- */
 const sheets = { stats: document.getElementById('statsSheet'), settings: document.getElementById('settingsSheet'), help: document.getElementById('helpSheet'), archive: document.getElementById('archiveSheet') };
 function sheetOpen() { return Object.values(sheets).some(s => !s.hidden); }
-function closeSheets() { Object.values(sheets).forEach(s => s.hidden = true); clearInterval(cdTimer); }
+let lastFocus = null;
+function openSheet(s) {
+  if (!sheetOpen()) lastFocus = document.activeElement;
+  s.hidden = false;
+  const panel = s.querySelector('.panel'); panel.scrollTop = 0;
+  requestAnimationFrame(() => panel.focus({ preventScroll: true }));
+}
+function closeSheets() {
+  const wasOpen = sheetOpen();
+  Object.values(sheets).forEach(s => s.hidden = true); clearInterval(cdTimer);
+  if (wasOpen && lastFocus && typeof lastFocus.focus === 'function') { try { lastFocus.focus({ preventScroll: true }); } catch (e) {} }
+  lastFocus = null;
+}
 Object.values(sheets).forEach(s => {
   s.addEventListener('click', (e) => { if (e.target === s || e.target.closest('[data-close]')) closeSheets(); });
 });
 document.getElementById('btnStats').addEventListener('click', () => openStats(true));
 document.getElementById('btnMoreStats').addEventListener('click', () => { document.getElementById('statsFull').hidden = false; document.getElementById('btnMoreStats').hidden = true; });
 document.getElementById('btnSettings').addEventListener('click', openSettings);
-document.getElementById('btnHelp').addEventListener('click', () => { closeSheets(); sheets.help.hidden = false; });
+document.getElementById('btnHelp').addEventListener('click', () => { closeSheets(); openSheet(sheets.help); });
 document.getElementById('btnPractice').addEventListener('click', () => { closeSheets(); setMode(mode === 'practice' ? 'daily' : 'practice', false); toast(mode === 'practice' ? 'Practice mode. Your daily streak is safe here.' : `Back to today's puzzle`); });
 document.getElementById('btnArchive').addEventListener('click', openArchive);
 function openArchive() {
@@ -863,13 +906,57 @@ function openArchive() {
   addRow(today, 'Today', statusOf(store.daily), mode === 'daily', () => { closeSheets(); setMode('daily', false); });
   for (let n = today - 1; n >= 1; n--) addRow(n, puzzleDate(n), statusOf(store.archive[n]), mode === 'archive' && game.puzzle === n, () => { closeSheets(); setMode('archive', n); toast(`Archive puzzle #${n}`); });
   if (today === 1) { const p = document.createElement('p'); p.className = 'note'; p.textContent = 'Past puzzles will appear here from tomorrow.'; list.appendChild(p); }
-  sheets.archive.hidden = false;
+  openSheet(sheets.archive);
 }
-document.getElementById('btnPlayPractice').addEventListener('click', () => { closeSheets(); setMode('practice', true); toast('New practice word'); });
+document.getElementById('btnPlayPractice').addEventListener('click', () => { closeSheets(); setMode('practice', true); Host.track('practice_start', { pack: PACK.id }); toast('New practice word'); });
 document.getElementById('btnShare').addEventListener('click', async () => {
-  const r = await Host.share(shareText());
+  const text = shareText(); let blob = null;
+  try { blob = await shareImage(); } catch (e) {}
+  const r = await Host.share({ text, blob, filename: `five-letters-${game.puzzle || 'practice'}.png` });
+  Host.track('share', { mode, result: r, image: !!blob });
   if (r === 'copied') toast('Copied to clipboard'); else if (r === 'failed') toast('Could not share on this device');
 });
+function themeColor(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function roundRect(x, px, py, w, h, r, strokeOnly) {
+  x.beginPath(); x.moveTo(px + r, py); x.arcTo(px + w, py, px + w, py + h, r); x.arcTo(px + w, py + h, px, py + h, r); x.arcTo(px, py + h, px, py, r); x.arcTo(px, py, px + w, py, r); x.closePath();
+  if (strokeOnly) x.stroke(); else x.fill();
+}
+function wrapText(x, text, px, py, maxW, lineH, maxLines) {
+  const words = text.split(' '); let line = '', lines = 0;
+  for (const w of words) {
+    const test = line ? line + ' ' + w : w;
+    if (x.measureText(test).width > maxW && line) { x.fillText(line, px, py); py += lineH; line = w; if (++lines >= maxLines - 1) { line += '…'; break; } }
+    else line = test;
+  }
+  x.fillText(line, px, py); return py + lineH;
+}
+function eyebrowText() { return mode === 'daily' ? `Puzzle #${game.puzzle} · ${puzzleDate(game.puzzle)}` : mode === 'archive' ? `Archive #${game.puzzle} · ${puzzleDate(game.puzzle)}` : 'Practice'; }
+// A 1080×1350 PNG for the share sheet: result, the grid, the comparison line, streak.
+async function shareImage() {
+  if (game.status === 'playing') return null;
+  const W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d'); if (!x) return null;
+  const family = themeColor('--font-display') || 'sans-serif';
+  const font = (w, px) => `${w} ${px}px ${family}`;
+  const col = { correct: themeColor('--correct'), present: themeColor('--present'), absent: themeColor('--absent') };
+  x.fillStyle = themeColor('--surface'); x.fillRect(0, 0, W, H);
+  x.textBaseline = 'top';
+  x.fillStyle = themeColor('--fg'); x.font = font(700, 64); x.fillText('Five Letters', 80, 80);
+  x.fillStyle = themeColor('--muted'); x.font = font(500, 36); x.fillText(eyebrowText(), 80, 162);
+  const n = game.guesses.length, won = game.status === 'won';
+  x.fillStyle = themeColor('--fg'); x.font = font(700, 96); x.fillText(won ? `Solved in ${n}` : 'Not this time', 80, 232);
+  const size = 96, gap = 14, gx = 80, gy = 390;
+  game.guesses.forEach((g, r) => score(g, game.answer).forEach((st, c) => { x.fillStyle = col[st]; roundRect(x, gx + c * (size + gap), gy + r * (size + gap), size, size, 16); }));
+  x.strokeStyle = themeColor('--line'); x.lineWidth = 3;
+  for (let r = n; r < ROWS; r++) for (let c = 0; c < L; c++) roundRect(x, gx + c * (size + gap), gy + r * (size + gap), size, size, 16, true);
+  let ty = gy + ROWS * (size + gap) + 36;
+  x.fillStyle = themeColor('--fg'); x.font = font(500, 38);
+  ty = wrapText(x, document.getElementById('resultCompare').textContent, 80, ty, W - 160, 50, 3);
+  x.fillStyle = themeColor('--muted'); x.font = font(500, 32);
+  const foot = (mode === 'daily' && effectiveStreak() > 0 ? `${effectiveStreak()} day streak · ` : '') + (location.hostname && location.hostname !== 'localhost' ? location.hostname : 'Five Letters');
+  x.fillText(foot, 80, H - 110);
+  return new Promise(res => cv.toBlob(b => res(b), 'image/png'));
+}
 
 let cdTimer = null;
 function openStats(full) {
@@ -912,7 +999,7 @@ function openStats(full) {
   document.getElementById('btnShare').hidden = !done;
   document.getElementById('btnPlayPractice').textContent = mode === 'practice' ? 'New practice word' : 'Practice word';
   if (!sum.hidden) { tickCountdown(); cdTimer = setInterval(tickCountdown, 1000); }
-  sheets.stats.hidden = false;
+  openSheet(sheets.stats);
   if (done) {
     refreshCompare();
     if (mode !== 'practice') {
@@ -949,19 +1036,26 @@ function openSettings() {
   document.getElementById('hardHint').textContent = midGame && !game.hardMode ? 'Can only be switched on at the start of a round.' : 'Revealed hints must be used in later guesses. Eliminated letters are locked.';
   optContrast.checked = store.settings.contrast; optUnused.checked = store.settings.unused; optHaptics.checked = store.settings.haptics !== false;
   document.querySelectorAll('#themeSeg button').forEach(b => b.classList.toggle('on', b.dataset.themeOpt === store.settings.theme));
-  document.getElementById('packInfo').textContent = `${PACK.name} · ${PACK.order.length.toLocaleString()} answers, ${(PACK.order.length + PACK.extraCount).toLocaleString()} accepted words · v${PACK.version}`;
-  sheets.settings.hidden = false;
+  const sel = document.getElementById('optPack');
+  sel.innerHTML = MANIFEST.map(m => `<option value="${m.id}"${m.id === PACK.id ? ' selected' : ''}>${m.name}${m.beta ? ' (beta)' : ''}</option>`).join('');
+  document.getElementById('packInfo').textContent = `${PACK.order.length.toLocaleString()} answers, ${(PACK.order.length + PACK.extraCount).toLocaleString()} accepted words` + (PACK.beta ? '. Beta list, not yet reviewed by a native speaker.' : '');
+  openSheet(sheets.settings);
 }
+document.getElementById('optPack').addEventListener('change', (e) => {
+  const to = e.target.value; if (to === PACK.id) return;
+  Host.storage.set(PACK_PREF_KEY, to); Host.track('pack_switch', { from: PACK.id, to });
+  location.reload();
+});
 optHard.addEventListener('change', () => {
-  store.settings.hardMode = optHard.checked; game.hardMode = optHard.checked; persistGame(); render();
+  store.settings.hardMode = optHard.checked; game.hardMode = optHard.checked; persistGame(); render(); Host.track('setting_change', { key: 'hardMode', value: optHard.checked });
   toast(optHard.checked ? 'Hard mode on' : 'Hard mode off');
 });
-optContrast.addEventListener('change', () => { store.settings.contrast = optContrast.checked; save(); applyTheme(); });
-optUnused.addEventListener('change', () => { store.settings.unused = optUnused.checked; save(); render(); });
-optHaptics.addEventListener('change', () => { store.settings.haptics = optHaptics.checked; Host.hapticsEnabled = optHaptics.checked; save(); if (optHaptics.checked) Host.haptic('tap'); });
+optContrast.addEventListener('change', () => { store.settings.contrast = optContrast.checked; save(); applyTheme(); Host.track('setting_change', { key: 'contrast', value: optContrast.checked }); });
+optUnused.addEventListener('change', () => { store.settings.unused = optUnused.checked; save(); render(); Host.track('setting_change', { key: 'unused', value: optUnused.checked }); });
+optHaptics.addEventListener('change', () => { store.settings.haptics = optHaptics.checked; Host.hapticsEnabled = optHaptics.checked; save(); if (optHaptics.checked) Host.haptic('tap'); Host.track('setting_change', { key: 'haptics', value: optHaptics.checked }); });
 document.getElementById('themeSeg').addEventListener('click', (e) => {
   const b = e.target.closest('button'); if (!b) return;
-  store.settings.theme = b.dataset.themeOpt; save(); applyTheme();
+  store.settings.theme = b.dataset.themeOpt; save(); applyTheme(); Host.track('setting_change', { key: 'theme', value: b.dataset.themeOpt });
   document.querySelectorAll('#themeSeg button').forEach(x => x.classList.toggle('on', x === b));
 });
 function applyTheme() {
@@ -987,7 +1081,16 @@ boardEl.addEventListener('pointerup', (e) => {
 document.addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.key === 'Escape') { closeSheets(); return; }
-  if (sheetOpen()) return;
+  if (sheetOpen()) {
+    if (e.key !== 'Tab') return;
+    const panel = Object.values(sheets).find(s => !s.hidden).querySelector('.panel');
+    const f = [...panel.querySelectorAll('button, input, select, [tabindex]:not([tabindex="-1"])')].filter(el => !el.disabled && el.offsetParent !== null);
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && (document.activeElement === first || document.activeElement === panel)) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    return;
+  }
   if (e.key === 'Enter') { e.preventDefault(); handleKey('enter'); }
   else if (e.key === 'Backspace') { e.preventDefault(); handleKey('backspace'); }
   else if (e.key.length === 1) { const k = e.key.toLowerCase(); if (PACK.alphabet.includes(k)) handleKey(k); }
@@ -999,6 +1102,8 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden && mo
 applyTheme();
 Host.hapticsEnabled = store.settings.haptics !== false;
 setMode('daily', false);
+Host.track('app_open', { pack: PACK.id, puzzle: game.puzzle, status: game.status, bridge: !!Bridge });
+if (DEBUG) window.FiveLettersDebug = { shareImage, shareText, game: () => game, pack: PACK };
 if (game.status !== 'playing') setTimeout(() => openStats(false), 300);
 })();
 </script>

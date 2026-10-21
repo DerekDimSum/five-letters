@@ -1,0 +1,29 @@
+[
+  {
+    "id": "en",
+    "name": "English",
+    "language": "en",
+    "file": "packs/en.json"
+  },
+  {
+    "id": "ms",
+    "name": "Bahasa Melayu",
+    "language": "ms",
+    "file": "packs/ms.json",
+    "beta": true
+  },
+  {
+    "id": "id",
+    "name": "Bahasa Indonesia",
+    "language": "id",
+    "file": "packs/id.json",
+    "beta": true
+  },
+  {
+    "id": "fil",
+    "name": "Filipino",
+    "language": "fil",
+    "file": "packs/fil.json",
+    "beta": true
+  }
+]
