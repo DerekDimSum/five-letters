@@ -28,7 +28,8 @@
   --font-display: 'Outfit', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --radius: 12px;
-  --tile: clamp(38px, min(62px, (100vw - 60px) / 5, (100dvh - 350px) / 6), 62px);
+  --cols: 5;
+  --tile: clamp(38px, min(62px, (100vw - 60px) / var(--cols), (100dvh - 370px) / 6), 62px);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -44,6 +45,7 @@
   --accent: #6f9eff; --on-accent: #0d1420; --scrim: rgba(0, 0, 0, 0.6);
   color-scheme: dark;
 }
+:root[data-text="large"] { font-size: 112%; }
 :root[data-contrast="high"] {
   --correct: #f5793a; --present: #85c0f9; --on-present: #0b1a2a;
 }
@@ -53,7 +55,7 @@
 html, body { height: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--fg);
-  font-family: var(--font-body); font-size: 15px; line-height: 1.4;
+  font-family: var(--font-body); font-size: 0.9375rem; line-height: 1.4;
   -webkit-tap-highlight-color: transparent; overscroll-behavior: none;
   user-select: none; -webkit-user-select: none;
 }
@@ -83,23 +85,27 @@ header {
 .icon-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 main { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: 0; padding-block: 8px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; padding: 2px 0; }
+.chip { padding: 7px 13px; border-radius: 999px; background: var(--key); color: var(--muted); font-size: 0.8rem; font-weight: 600; line-height: 1; }
+.chip.on { background: var(--accent); color: var(--on-accent); }
+.chip small { font-size: 0.7em; opacity: 0.8; margin-left: 3px; }
 .coach { text-align: center; color: var(--muted); font-size: 0.9rem; min-height: 1.4em; animation: fadein 300ms ease; }
 .coach.legend { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; font-size: 0.82rem; }
 .coach.legend span { display: inline-flex; align-items: center; gap: 6px; }
 .coach.legend i { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
 .coach.legend i.correct { background: var(--correct); } .coach.legend i.present { background: var(--present); } .coach.legend i.absent { background: var(--absent); }
 @keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-.summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
-.summary div { text-align: center; padding: 12px 8px; border: 1px solid var(--line); border-radius: 12px; }
+.summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.summary div { text-align: center; padding: 10px 8px; border: 1px solid var(--line); border-radius: 12px; }
 .summary b { display: block; font: 700 1.5rem var(--font-display); font-variant-numeric: tabular-nums; line-height: 1.1; }
 .summary span { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
-.linkbtn { display: block; width: 100%; text-align: center; margin-top: 14px; color: var(--accent); font-weight: 600; padding: 8px; }
+.linkbtn { display: block; width: 100%; text-align: center; margin-top: 6px; color: var(--accent); font-weight: 600; padding: 8px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .panel:focus { outline: none; }
 .setting select { font: inherit; background: var(--key); color: var(--fg); border: 0; border-radius: 8px; padding: 8px 10px; max-width: 46%; }
 .ios-haptic { position: fixed; left: -9999px; top: 0; width: 1px; height: 1px; overflow: hidden; opacity: 0.01; pointer-events: none; }
 .board { display: grid; grid-template-rows: repeat(6, var(--tile)); gap: 5px; touch-action: pan-y; }
-.row { display: grid; grid-template-columns: repeat(5, var(--tile)); gap: 5px; }
+.row { display: grid; grid-template-columns: repeat(var(--cols), var(--tile)); gap: 5px; }
 .tile {
   width: var(--tile); height: var(--tile); display: grid; place-items: center;
   border: 2px solid var(--line); border-radius: 6px;
@@ -130,8 +136,8 @@ main { flex: 1 1 auto; display: flex; flex-direction: column; align-items: cente
 .arch-row .st { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
 .arch-row .st.won { color: var(--correct); font-weight: 600; }
 .arch-row .st.lost { color: var(--danger); font-weight: 600; }
-.insight { font-weight: 600; margin: 0 0 10px; }
-.meaning { color: var(--muted); font-size: 0.92rem; margin: 0 0 10px; }
+.insight { font-weight: 600; margin: 0 0 8px; }
+.meaning { color: var(--muted); font-size: 0.86rem; margin: 0 0 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .meaning b { color: var(--fg); font: 700 0.95rem var(--font-display); text-transform: uppercase; letter-spacing: 0.08em; }
 .meaning i { font-style: italic; }
 #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 25; }
@@ -175,17 +181,17 @@ main { flex: 1 1 auto; display: flex; flex-direction: column; align-items: cente
 .sheet { position: fixed; inset: 0; background: var(--scrim); display: grid; align-items: end; justify-items: center; z-index: 30; padding: 0; }
 .panel {
   background: var(--surface); color: var(--fg); width: 100%; max-width: 520px; max-height: calc(100dvh - 40px); overflow-y: auto;
-  border-radius: 18px 18px 0 0; padding: 20px max(20px, env(safe-area-inset-left, 0px)) max(24px, env(safe-area-inset-bottom, 0px)); position: relative;
+  border-radius: 18px 18px 0 0; padding: 16px max(20px, env(safe-area-inset-left, 0px)) max(20px, env(safe-area-inset-bottom, 0px)); position: relative;
   animation: rise 220ms ease-out;
 }
 @media (min-width: 600px) { .sheet { align-items: center; } .panel { border-radius: 18px; max-height: calc(100dvh - 80px); } }
 @keyframes rise { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
 .close { position: absolute; top: 12px; right: 12px; }
-.panel h2 { font: 700 1.5rem var(--font-display); margin: 0 0 4px; text-wrap: balance; }
+.panel h2 { font: 700 1.5rem var(--font-display); margin: 0 0 2px; text-wrap: balance; }
 .panel h3 { font: 700 0.75rem var(--font-body); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 22px 0 10px; }
 .eyebrow { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 6px; }
 .panel p { margin: 0 0 8px; }
-.compare { font-size: 1.02rem; }
+.compare { font-size: 0.98rem; margin-bottom: 6px; }
 .note { color: var(--muted); font-size: 0.9rem; }
 .answer-word { font: 700 1.1rem var(--font-display); text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
 
@@ -200,7 +206,7 @@ main { flex: 1 1 auto; display: flex; flex-direction: column; align-items: cente
 .freezes { display: flex; align-items: center; gap: 10px; margin-top: 16px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 0.88rem; }
 .freezes b { font-variant-numeric: tabular-nums; }
 .freezes svg { width: 20px; height: 20px; flex: 0 0 auto; stroke: var(--accent); fill: none; stroke-width: 2; stroke-linecap: round; }
-.actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+.actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
 .btn { flex: 1 1 140px; height: 46px; border-radius: 10px; background: var(--key); font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
 .btn.primary { background: var(--accent); color: var(--on-accent); }
 .btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -252,6 +258,7 @@ main { flex: 1 1 auto; display: flex; flex-direction: column; align-items: cente
   </header>
 
   <main>
+    <div class="chips" id="packChips" role="group" aria-label="Practice word list" hidden></div>
     <div class="board" id="board" role="grid" aria-label="Guess grid"></div>
     <div class="coach" id="coach" aria-live="polite">Loading words…</div>
   </main>
@@ -272,13 +279,13 @@ main { flex: 1 1 auto; display: flex; flex-direction: column; align-items: cente
       <h2 id="resultTitle"></h2>
       <p class="insight" id="resultInsight" hidden></p>
       <p id="resultAnswer" hidden>The word was <span class="answer-word" id="resultWord"></span></p>
-      <p class="meaning" id="resultMeaning" hidden></p>
       <p class="compare" id="resultCompare"></p>
+      <p class="meaning" id="resultMeaning" hidden></p>
       <p class="source" id="resultSource"></p>
       <p class="note" id="resultNote" hidden></p>
     </div>
     <div class="summary" id="resultSummary" hidden>
-      <div><b id="rStreak">0</b><span>Day streak</span></div>
+      <div><b id="rStreak">0</b><span id="rStreakLabel">Day streak</span></div>
       <div><b id="rNext">00:00</b><span>Next word</span></div>
     </div>
     <div id="statsFull">
@@ -334,8 +341,11 @@ main { flex: 1 1 auto; display: flex; flex-direction: column; align-items: cente
       </div>
     </div>
     <div class="setting">
-      <div class="label"><span>Language</span><small id="packInfo"></small></div>
-      <select id="optPack" aria-label="Word list language"></select>
+      <div class="label"><span>Larger text</span><small>Bigger type in the result and settings screens.</small></div>
+      <label class="switch"><input type="checkbox" id="optLarge" aria-label="Larger text"><i></i></label>
+    </div>
+    <div class="setting">
+      <div class="label"><span>Word lists</span><small id="packInfo"></small></div>
     </div>
     <p class="note" style="margin-top:14px">Animations follow your device's reduce-motion setting.</p>
   </div>
@@ -363,6 +373,8 @@ main { flex: 1 1 auto; display: flex; flex-direction: column; align-items: cente
     <p><strong>N</strong> is not in the word anywhere.</p>
     <h3>Shortcuts</h3>
     <p>Tap a filled tile to change that letter. Swipe left on the grid to clear the row. Hold backspace to delete quickly.</p>
+    <h3>Practice</h3>
+    <p>The ∞ button opens practice: unlimited words with their own stats. Pick a list above the grid: English, Easy (four letters), Malay, Indonesian or Filipino. Only English counts for the daily streak.</p>
     <h3>Streaks</h3>
     <p>A new word arrives at midnight. Solve it each day to build a streak. Every seven daily games earns a streak freeze that covers one missed day.</p>
   </div>
@@ -477,22 +489,23 @@ function normalizePack(raw) {
   const freq = {}; for (const w of answers) for (const c of new Set(w)) freq[c] = (freq[c] || 0) + 1;
   for (const c in freq) freq[c] /= answers.length;
   return {
-    id: raw.id || 'pack', name: raw.name || 'Words', language: raw.language || raw.id || 'en', version: raw.version || 1, L, beta: !!raw.beta,
+    id: raw.id || 'pack', name: raw.name || 'Words', short: raw.short || raw.name || 'Words', language: raw.language || raw.id || 'en', version: raw.version || 1, L, beta: !!raw.beta,
     alphabet: [...raw.alphabet], keyboard: raw.keyboard, epoch: raw.epoch,
     order, all: answers, valid, extraCount: extra.length, difficulty: raw.difficulty || {}, freq,
   };
 }
 
-const PACK_PREF_KEY = 'fiveletters.pack';
+async function fetchPack(entry) {
+  const raw = await (await fetch(entry.file)).json();
+  raw.beta = !!entry.beta; raw.short = entry.short || entry.name; raw.practiceOnly = !!entry.practiceOnly;
+  return raw;
+}
 async function loadPackJson() {
   let manifest = [];
   try { manifest = await (await fetch('packs/index.json')).json(); } catch (e) {}
-  if (!Array.isArray(manifest) || !manifest.length) manifest = [{ id: 'en', name: 'English', language: 'en', file: 'packs/en.json' }];
-  const wanted = Host.storage.get(PACK_PREF_KEY);
-  const entry = manifest.find(m => m.id === wanted) || manifest[0];
-  const raw = await (await fetch(entry.file)).json();
-  raw.beta = !!entry.beta;
-  return { raw, manifest };
+  if (!Array.isArray(manifest) || !manifest.length) manifest = [{ id: 'en', name: 'English', language: 'en', file: 'packs/en.json', daily: true }];
+  const entry = manifest.find(m => m.daily) || manifest[0];
+  return { raw: await fetchPack(entry), manifest };
 }
 let loaded;
 try { loaded = await loadPackJson(); }
@@ -501,8 +514,15 @@ catch (e) {
   throw e;
 }
 const MANIFEST = loaded.manifest;
-const PACK = normalizePack(loaded.raw);
-const L = PACK.L, ROWS = 6;
+let PACK = normalizePack(loaded.raw);     // the pack in play: the daily pack, or the chosen practice pack
+const DAILY_PACK = PACK;
+let L = PACK.L; const ROWS = 6;
+const packCache = { [PACK.id]: PACK };
+async function getPack(id) {
+  if (packCache[id]) return packCache[id];
+  const entry = MANIFEST.find(m => m.id === id); if (!entry) return DAILY_PACK;
+  return (packCache[id] = normalizePack(await fetchPack(entry)));
+}
 // Live comparison service. Same-origin by default; point at the deployed host when the game is served from elsewhere.
 const STATS_API = '/api/stats';
 const DEFINE_API = '/api/define';
@@ -521,7 +541,7 @@ function expectedGuesses(word) {
 function localMidnight(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); }
 function epochMidnight() { const [y, m, d] = PACK.epoch.split('-').map(Number); return new Date(y, m - 1, d).getTime(); }
 function todayIndex() { return Math.round((localMidnight(Host.now()) - epochMidnight()) / 86400000); }
-function answerForIndex(i) { const n = PACK.order.length; return PACK.order[((i % n) + n) % n]; }
+function answerForIndex(i) { const n = DAILY_PACK.order.length; return DAILY_PACK.order[((i % n) + n) % n]; }
 
 /* ---------- Store (versioned) ---------- */
 const STORE_KEY = 'fiveletters.' + PACK.id;
@@ -530,12 +550,13 @@ function emptyStats() { return { played: 0, won: 0, streak: 0, maxStreak: 0, dis
 function defaultStore() {
   return {
     schema: SCHEMA,
-    settings: { hardMode: false, contrast: false, theme: 'system', unused: false, haptics: true },
+    settings: { hardMode: false, contrast: false, theme: 'system', unused: false, haptics: true, largeText: false, practicePack: null },
     seenHelp: false,
     firstEndSeen: false,
     daily: { puzzle: null, guesses: [], current: '', status: 'playing', hardMode: false, reported: false, live: null },
     archive: {},
-    practice: { answer: null, guesses: [], current: '', status: 'playing', hardMode: false },
+    practice: { answer: null, guesses: [], current: '', status: 'playing', hardMode: false },   // legacy; see practiceGames
+    practiceGames: {},
     stats: { daily: Object.assign(emptyStats(), { freezes: 0, playedSinceFreeze: 0 }), practice: emptyStats() },
   };
 }
@@ -548,7 +569,7 @@ function loadStore() {
     if (raw) {
       const s = JSON.parse(raw);
       if (s.schema !== SCHEMA) res = migrate(s, base);
-      else res = Object.assign(base, s, { settings: Object.assign(base.settings, s.settings), archive: s.archive || {}, stats: { daily: Object.assign(base.stats.daily, s.stats && s.stats.daily), practice: Object.assign(base.stats.practice, s.stats && s.stats.practice) } });
+      else res = Object.assign(base, s, { settings: Object.assign(base.settings, s.settings), archive: s.archive || {}, practiceGames: s.practiceGames || {}, stats: { daily: Object.assign(base.stats.daily, s.stats && s.stats.daily), practice: Object.assign(base.stats.practice, s.stats && s.stats.practice) } });
     }
   } catch (e) { res = base; }
   try { const g = JSON.parse(Host.storage.get(GLOBAL_SETTINGS_KEY) || 'null'); if (g) Object.assign(res.settings, g); } catch (e) {}
@@ -591,12 +612,19 @@ function describeExpected(e) {
   if (frac > 0.7) return `about ${lo + 1}`;
   return `${lo} to ${lo + 1}`;
 }
+const COMPARE_COPY = {
+  fast: ['Faster than most. Players typically need {t} tries on this one.', 'Ahead of the pack. {T} tries is the usual here.', 'Quicker than the typical {t} tries.', 'Most people need {t} goes at this word. You did not.', 'Sharp. The usual solve is {t} tries.'],
+  typical: ['Right around the typical solve of {t} tries.', 'What this word usually takes: {t} tries.', 'A solid solve. Most players need {t} tries too.', 'In step with everyone else. {T} tries is the norm.'],
+  slow: ['That one fought back. Players usually get it in {t}.', 'Slower than usual, but a solve is a solve. Most need {t}.', 'A few more than the usual {t} tries, and it still counts.', 'Not your fastest. This word usually falls in {t}.'],
+  lost: ['That was a tough one. Players typically need {t} tries, and plenty miss it.', 'A hard word. Even steady players need {t} tries here.', 'No shame in that one. It usually takes {t} tries and often more.'],
+};
 function compareLine(won, n, answer) {
-  const e = expectedGuesses(answer), typical = describeExpected(e);
-  if (!won) return `That was a tough one. Players typically need ${typical} tries on this word, and plenty don't get it at all.`;
-  if (n <= e - 1) return `Faster than most. Players typically need ${typical} tries on this one.`;
-  if (n >= e + 1) return `That one fought back. Players typically get it in ${typical}, so it was a hard word to crack.`;
-  return `Right around the typical solve. Most players need ${typical} tries on this word.`;
+  const e = expectedGuesses(answer), t = describeExpected(e);
+  const bucket = !won ? 'lost' : n <= e - 1 ? 'fast' : n >= e + 1 ? 'slow' : 'typical';
+  const arr = COMPARE_COPY[bucket], pick = arr[(game.puzzle || hashStr(answer)) % arr.length];
+  const line = pick.replace('{t}', t).replace('{T}', t.charAt(0).toUpperCase() + t.slice(1));
+  const remark = e >= 4.7 ? ' One of the harder words in the list.' : e <= 3.1 ? ' A gentle one.' : '';
+  return line + remark;
 }
 
 /* ---------- Game state ---------- */
@@ -617,11 +645,14 @@ function loadDaily() {
   return { answer: answerForIndex(idx), puzzle: d.puzzle, guesses: d.guesses, current: d.current, status: d.status, hardMode: d.hardMode };
 }
 function loadPractice(fresh) {
-  const p = store.practice;
-  if (fresh || !p.answer) {
+  const games = store.practiceGames;
+  // Carry a game saved by the single-practice version into the daily pack's slot.
+  if (!games[DAILY_PACK.id] && store.practice && store.practice.answer) { games[DAILY_PACK.id] = store.practice; store.practice = { answer: null, guesses: [], current: '', status: 'playing', hardMode: false }; }
+  let p = games[PACK.id];
+  if (fresh || !p || !p.answer) {
     const today = answerForIndex(todayIndex());
     let w; do { w = PACK.all[Math.floor(Math.random() * PACK.all.length)]; } while (w === today && PACK.all.length > 1);
-    Object.assign(p, { answer: w, guesses: [], current: '', status: 'playing', hardMode: store.settings.hardMode });
+    p = games[PACK.id] = { answer: w, guesses: [], current: '', status: 'playing', hardMode: store.settings.hardMode };
     save();
   }
   return { answer: p.answer, puzzle: null, guesses: p.guesses, current: p.current, status: p.status, hardMode: p.hardMode };
@@ -631,16 +662,23 @@ function loadArchive(puzzle) {
   const a = store.archive[puzzle];
   return { answer: answerForIndex(puzzle - 1), puzzle, guesses: a.guesses, current: a.current, status: a.status, hardMode: a.hardMode };
 }
-function slotFor(m) { return m === 'daily' ? store.daily : m === 'practice' ? store.practice : store.archive[game.puzzle]; }
+function slotFor(m) { return m === 'daily' ? store.daily : m === 'practice' ? store.practiceGames[PACK.id] : store.archive[game.puzzle]; }
 function persistGame() {
   const slot = slotFor(mode);
   slot.guesses = game.guesses; slot.current = game.current; slot.status = game.status; slot.hardMode = game.hardMode;
   save();
 }
-function setMode(m, arg) {
+async function setMode(m, arg, packId) {
   mode = m; cursor = null; busy = false;
+  if (m === 'practice') {
+    const want = packId || store.settings.practicePack || DAILY_PACK.id;
+    try { PACK = await getPack(want); } catch (e) { PACK = DAILY_PACK; toast('Could not load that word list'); }
+    if (store.settings.practicePack !== PACK.id) { store.settings.practicePack = PACK.id; save(); }
+  } else PACK = DAILY_PACK;
+  if (L !== PACK.L) { L = PACK.L; buildBoard(L); }
   game = m === 'daily' ? loadDaily() : m === 'practice' ? loadPractice(arg) : loadArchive(arg);
-  document.getElementById('modeLabel').textContent = m === 'daily' ? `Daily puzzle #${game.puzzle}` : m === 'practice' ? 'Practice' : `Archive #${game.puzzle}`;
+  document.getElementById('modeLabel').textContent = m === 'daily' ? `Daily puzzle #${game.puzzle}` : m === 'practice' ? `Practice · ${PACK.short}` : `Archive #${game.puzzle}`;
+  renderChips();
   const pb = document.getElementById('btnPractice'), ab = document.getElementById('btnArchive');
   pb.classList.toggle('active', m === 'practice'); pb.setAttribute('aria-pressed', String(m === 'practice'));
   ab.classList.toggle('active', m === 'archive'); ab.setAttribute('aria-pressed', String(m === 'archive'));
@@ -648,19 +686,40 @@ function setMode(m, arg) {
 }
 function puzzleDate(n) { return new Date(epochMidnight() + (n - 1) * 86400000).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }); }
 
+function renderChips() {
+  const el = document.getElementById('packChips'); el.hidden = mode !== 'practice';
+  if (el.hidden) return;
+  el.innerHTML = '';
+  for (const m of MANIFEST) {
+    const b = document.createElement('button'); b.className = 'chip' + (m.id === PACK.id ? ' on' : ''); b.setAttribute('aria-pressed', String(m.id === PACK.id));
+    b.innerHTML = (m.short || m.name) + (m.beta ? '<small>beta</small>' : '');
+    b.addEventListener('click', async () => {
+      if (m.id === PACK.id || busy) return;
+      const from = PACK.id; await setMode('practice', false, m.id);
+      Host.haptic('tap'); Host.track('pack_switch', { from, to: m.id, mode: 'practice' }); toast(`Practice: ${m.name}`);
+    });
+    el.appendChild(b);
+  }
+}
+
 /* ---------- Rendering ---------- */
 const boardEl = document.getElementById('board'), kbEl = document.getElementById('kb'), toastEl = document.getElementById('toast');
-const tiles = [];
-for (let r = 0; r < ROWS; r++) {
-  const row = document.createElement('div'); row.className = 'row'; row.setAttribute('role', 'row'); row.setAttribute('aria-label', `Guess ${r + 1}`);
-  const rowTiles = [];
-  for (let c = 0; c < L; c++) {
-    const t = document.createElement('div'); t.className = 'tile'; t.setAttribute('role', 'gridcell'); t.style.setProperty('--i', c);
-    t.addEventListener('click', () => onTileTap(r, c));
-    row.appendChild(t); rowTiles.push(t);
+let tiles = [];
+function buildBoard(len) {
+  boardEl.innerHTML = ''; tiles = [];
+  document.documentElement.style.setProperty('--cols', len);
+  for (let r = 0; r < ROWS; r++) {
+    const row = document.createElement('div'); row.className = 'row'; row.setAttribute('role', 'row'); row.setAttribute('aria-label', `Guess ${r + 1}`);
+    const rowTiles = [];
+    for (let c = 0; c < len; c++) {
+      const t = document.createElement('div'); t.className = 'tile'; t.setAttribute('role', 'gridcell'); t.style.setProperty('--i', c);
+      t.addEventListener('click', () => onTileTap(r, c));
+      row.appendChild(t); rowTiles.push(t);
+    }
+    boardEl.appendChild(row); tiles.push(rowTiles);
   }
-  boardEl.appendChild(row); tiles.push(rowTiles);
 }
+buildBoard(L);
 const keyEls = {};
 PACK.keyboard.forEach((rowStr, ri) => {
   const row = document.createElement('div'); row.className = 'kb-row' + (ri === 1 ? ' offset' : '');
@@ -1005,7 +1064,7 @@ function wrapText(x, text, px, py, maxW, lineH, maxLines) {
   }
   x.fillText(line, px, py); return py + lineH;
 }
-function eyebrowText() { return mode === 'daily' ? `Puzzle #${game.puzzle} · ${puzzleDate(game.puzzle)}` : mode === 'archive' ? `Archive #${game.puzzle} · ${puzzleDate(game.puzzle)}` : 'Practice'; }
+function eyebrowText() { return mode === 'daily' ? `Puzzle #${game.puzzle} · ${puzzleDate(game.puzzle)}` : mode === 'archive' ? `Archive #${game.puzzle} · ${puzzleDate(game.puzzle)}` : `Practice · ${PACK.name}`; }
 // A 1080×1350 PNG for the share sheet: result, the grid, the comparison line, streak.
 async function shareImage() {
   if (game.status === 'playing') return null;
@@ -1044,17 +1103,20 @@ function openStats(full) {
   const rb = document.getElementById('resultBlock'); rb.hidden = !done;
   if (done) {
     const n = game.guesses.length, won = game.status === 'won';
-    document.getElementById('resultEyebrow').textContent = mode === 'daily' ? `Puzzle #${game.puzzle}` : mode === 'archive' ? `Archive #${game.puzzle} · ${puzzleDate(game.puzzle)}` : 'Practice';
+    document.getElementById('resultEyebrow').textContent = mode === 'daily' ? `Puzzle #${game.puzzle}` : mode === 'archive' ? `Archive #${game.puzzle} · ${puzzleDate(game.puzzle)}` : `Practice · ${PACK.name}`;
     document.getElementById('resultTitle').textContent = won ? (n === 1 ? 'Solved in 1' : `Solved in ${n}`) : 'Not this time';
     document.getElementById('resultAnswer').hidden = won; document.getElementById('resultWord').textContent = game.answer;
     const ins = document.getElementById('resultInsight'); ins.textContent = insightLine(won); ins.hidden = false;
     document.getElementById('resultMeaning').hidden = true; fetchMeaning();
-    let noteText = mode === 'daily' ? lastNote : '';
-    if (mode === 'daily' && !store.firstEndSeen) { store.firstEndSeen = true; save(); noteText = (noteText ? noteText + ' ' : '') + (won ? 'A new word arrives at midnight. Come back tomorrow to keep the streak going.' : 'A new word arrives at midnight. Tomorrow is a fresh start.'); }
+    const noteText = mode === 'daily' ? lastNote : '';
     const note = document.getElementById('resultNote'); note.hidden = !noteText; note.textContent = noteText;
   }
   const sum = document.getElementById('resultSummary'); sum.hidden = !(done && mode === 'daily');
-  if (!sum.hidden) document.getElementById('rStreak').textContent = effectiveStreak();
+  if (!sum.hidden) {
+    const sv = effectiveStreak(), f = store.stats.daily.freezes || 0;
+    document.getElementById('rStreak').textContent = sv === 1 ? 'Day 1' : sv;
+    document.getElementById('rStreakLabel').textContent = sv === 1 ? 'Streak started' : 'Day streak' + (f ? ` · ${f} freeze${f > 1 ? 's' : ''}` : '');
+  }
   document.getElementById('statsScope').textContent = mode === 'practice' ? 'Practice words (kept separate from your daily streak)' : 'Daily puzzles';
   document.getElementById('sPlayed').textContent = st.played;
   document.getElementById('sWin').textContent = st.played ? Math.round(100 * st.won / st.played) : 0;
@@ -1094,7 +1156,7 @@ function tickCountdown() {
 }
 function shareText() {
   const n = game.guesses.length, won = game.status === 'won';
-  const head = mode === 'daily' ? `Five Letters #${game.puzzle} ${won ? n : 'X'}/${ROWS}` : mode === 'archive' ? `Five Letters #${game.puzzle} (archive) ${won ? n : 'X'}/${ROWS}` : `Five Letters practice ${won ? n : 'X'}/${ROWS}`;
+  const head = mode === 'daily' ? `Five Letters #${game.puzzle} ${won ? n : 'X'}/${ROWS}` : mode === 'archive' ? `Five Letters #${game.puzzle} (archive) ${won ? n : 'X'}/${ROWS}` : `Five Letters practice (${PACK.short}) ${won ? n : 'X'}/${ROWS}`;
   const hc = store.settings.contrast;
   const grid = game.guesses.map(g => score(g, game.answer).map(s => s === 'correct' ? (hc ? '🟧' : '🟩') : s === 'present' ? (hc ? '🟦' : '🟨') : '⬜').join('')).join('\n');
   const slot = mode === 'practice' ? null : slotFor(mode);
@@ -1105,29 +1167,23 @@ function shareText() {
 }
 
 /* ---------- Settings ---------- */
-const optHard = document.getElementById('optHard'), optContrast = document.getElementById('optContrast'), optUnused = document.getElementById('optUnused'), optHaptics = document.getElementById('optHaptics');
+const optHard = document.getElementById('optHard'), optContrast = document.getElementById('optContrast'), optUnused = document.getElementById('optUnused'), optHaptics = document.getElementById('optHaptics'), optLarge = document.getElementById('optLarge');
 function openSettings() {
   closeSheets();
   const midGame = game.status === 'playing' && game.guesses.length > 0;
   optHard.checked = game.hardMode; optHard.disabled = midGame && !game.hardMode;
   document.getElementById('hardHint').textContent = midGame && !game.hardMode ? 'Can only be switched on at the start of a round.' : 'Revealed hints must be used in later guesses. Eliminated letters are locked.';
-  optContrast.checked = store.settings.contrast; optUnused.checked = store.settings.unused; optHaptics.checked = store.settings.haptics !== false;
+  optContrast.checked = store.settings.contrast; optUnused.checked = store.settings.unused; optHaptics.checked = store.settings.haptics !== false; optLarge.checked = !!store.settings.largeText;
   document.querySelectorAll('#themeSeg button').forEach(b => b.classList.toggle('on', b.dataset.themeOpt === store.settings.theme));
-  const sel = document.getElementById('optPack');
-  sel.innerHTML = MANIFEST.map(m => `<option value="${m.id}"${m.id === PACK.id ? ' selected' : ''}>${m.name}${m.beta ? ' (beta)' : ''}</option>`).join('');
-  document.getElementById('packInfo').textContent = `${PACK.all.length.toLocaleString()} answers, ${(PACK.all.length + PACK.extraCount).toLocaleString()} accepted words` + (PACK.beta ? '. Beta list, not yet reviewed by a native speaker.' : '');
+  document.getElementById('packInfo').textContent = `Daily: ${DAILY_PACK.name}, ${DAILY_PACK.all.length.toLocaleString()} answers and ${(DAILY_PACK.all.length + DAILY_PACK.extraCount).toLocaleString()} accepted words. Practice adds ${MANIFEST.filter(m => m.id !== DAILY_PACK.id).map(m => m.short || m.name).join(', ')}.`;
   openSheet(sheets.settings);
 }
-document.getElementById('optPack').addEventListener('change', (e) => {
-  const to = e.target.value; if (to === PACK.id) return;
-  Host.storage.set(PACK_PREF_KEY, to); Host.track('pack_switch', { from: PACK.id, to });
-  location.reload();
-});
 optHard.addEventListener('change', () => {
   store.settings.hardMode = optHard.checked; game.hardMode = optHard.checked; persistGame(); render(); Host.track('setting_change', { key: 'hardMode', value: optHard.checked });
   toast(optHard.checked ? 'Hard mode on' : 'Hard mode off');
 });
 optContrast.addEventListener('change', () => { store.settings.contrast = optContrast.checked; save(); applyTheme(); Host.track('setting_change', { key: 'contrast', value: optContrast.checked }); });
+optLarge.addEventListener('change', () => { store.settings.largeText = optLarge.checked; save(); applyTheme(); Host.track('setting_change', { key: 'largeText', value: optLarge.checked }); });
 optUnused.addEventListener('change', () => { store.settings.unused = optUnused.checked; save(); render(); Host.track('setting_change', { key: 'unused', value: optUnused.checked }); });
 optHaptics.addEventListener('change', () => { store.settings.haptics = optHaptics.checked; Host.hapticsEnabled = optHaptics.checked; save(); if (optHaptics.checked) Host.haptic('tap'); Host.track('setting_change', { key: 'haptics', value: optHaptics.checked }); });
 document.getElementById('themeSeg').addEventListener('click', (e) => {
@@ -1139,6 +1195,7 @@ function applyTheme() {
   const root = document.documentElement;
   if (store.settings.theme === 'system') root.removeAttribute('data-theme'); else root.dataset.theme = store.settings.theme;
   if (store.settings.contrast) root.dataset.contrast = 'high'; else root.removeAttribute('data-contrast');
+  if (store.settings.largeText) root.dataset.text = 'large'; else root.removeAttribute('data-text');
 }
 
 /* ---------- Toast ---------- */
@@ -1180,7 +1237,7 @@ applyTheme();
 Host.hapticsEnabled = store.settings.haptics !== false;
 setMode('daily', false);
 Host.track('app_open', { pack: PACK.id, puzzle: game.puzzle, status: game.status, bridge: !!Bridge });
-if (DEBUG) window.FiveLettersDebug = { shareImage, shareText, game: () => game, pack: PACK };
+if (DEBUG) window.FiveLettersDebug = { shareImage, shareText, game: () => game, pack: () => PACK, setMode };
 if (game.status !== 'playing') setTimeout(() => openStats(false), 300);
 })();
 </script>

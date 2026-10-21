@@ -9,9 +9,12 @@ A word pack is one JSON file in `packs/`, named `<id>.json`, and listed in `pack
 ]
 ```
 
-The first entry is the default. `beta: true` shows a "(beta)" tag in the language picker.
-`scripts/build-packs.py` generates the current packs; a hand-built pack just needs to follow
-the schema below and be added to the manifest.
+Manifest fields: `daily: true` marks the one pack used for the daily puzzle (exactly one);
+`practiceOnly: true` lists a pack only in practice; `short` is the chip label; `beta: true`
+adds a beta tag. Packs may have different `wordLength` values; the board rebuilds when a
+practice pack with a different length is chosen. `scripts/build-packs.py` generates the
+current packs; a hand-built pack just needs to follow the schema below and be added to the
+manifest.
 
 ## Schema
 

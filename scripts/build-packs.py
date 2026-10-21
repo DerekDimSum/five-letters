@@ -14,7 +14,7 @@ from wordfreq import top_n_list, zipf_frequency
 
 ROOT = os.path.join(os.path.dirname(__file__), '..')
 OUT = os.path.join(ROOT, 'packs')
-L = 5
+L = 5   # reassigned per pack build
 EPOCH = '2026-10-21'
 
 # ---------- word sources ----------
@@ -33,13 +33,20 @@ PROPER = set(w.lower() for w in web2 if w[:1].isupper()) | FIRST_NAMES
 PROPER -= WEB2
 # First names are never answers, even when the dictionary also lists them lowercase ("benny", "maria").
 NEVER_ANSWER = FIRST_NAMES | set("""norma rowan garth rufus bosch kerry roger twain emery aspen thine mamma hanna benny bobby maria hitler
-prius faust torah polio hertz brill teeny pubic bosom lupus ebola sarin bible koran quran islam hindu jesus allah satan swiss dutch welsh irish texas""".split())
+prius faust torah polio hertz brill teeny pubic bosom lupus ebola sarin bible koran quran islam hindu jesus allah satan swiss dutch welsh irish texas
+khan sept crap nazi jews arab brit yank thai viet""".split())
+# Names and places that frequency lists for Malay, Indonesian and Filipino rank highly.
+LOCAL_NAMES = set("""ahmad yusof zahid anuar nabil iqbal amira farid harun osman imran nurul azhar salim gatot anies dhani ratna hafiz aiman
+fauzi rizal hakim rafiq aisha azlan zaini rosli jamal kamal rahim razak hamid fadli fikri yahya yusuf kalla elena yeong jeong
+jolie piolo aunor lopez josue sotto binay ramos roxas vilma sarah angel
+kuala tokyo seoul asean macau pasay sinai norte jambi jabar johor sabah kedah bogor papua batam davao luzon negri prodi ambon depok
+nokia astra intel honda yamaha toyota samsung""".split())
 # Regional and British spellings accepted as guesses so players across APAC are not told their word "is not a word".
 REGIONAL = set("""fibre litre metre odour mould tyres kerbs ochre sabre mitre aeons lupin storey
 shiok kiasu makan lepak chope bojio walao kopis sabos
 chook telly bogan dunny smoko servo arvos
 crore dhoti sahib lathi""".split())
-REGIONAL = set(w for w in REGIONAL if len(w) == L)
+REGIONAL_ALL = set(REGIONAL)
 
 # Slurs and words nobody wants to see as "the answer was". Applied to both lists.
 BLOCK_ALL = set("""nigga negro chink gooks spick spics kikes dykes faggy fagot bitch whore pussy cunts twats wanks cocks dicks shits turds nazis rapes raped rapey""".split())
@@ -49,7 +56,7 @@ ANSWER_ONLY_BLOCK = set("""penis semen vulva anus boobs enema fetus feces urine 
 JUNK = set("""didnt thats youre wasnt arent hasnt hadnt whats heres youll theyd youve whove doesnt isnt wont cant shes dont gonna wanna gotta kinda sorta lotta thanx lmfao omfg https wwwww tumblr imgur pls plz ohhh ahhh hmmmm yeahh okayy lolol haha hahah hehe hehehe ummm uhhh ooooh sooo soooo soooo wooo yayyy""".split())
 # Modern or everyday words the 1934 dictionary lacks.
 MODERN = set("""pizza email emoji vegan robot pixel drone sushi ninja karma bagel latte mocha disco bingo condo intro retro promo combo nacho salsa pasta ramen kebab vodka pesto panda koala hippo rhino llama zebra tacos burger vinyl audio video radio laser sauna yoga mango kiwi tofu curry logo blog vlog wifi app apps admin bots memes meme emoji selfie photo motel hotel""".split())
-MODERN = set(w for w in MODERN if len(w) == L)
+MODERN_ALL = set(MODERN)
 
 def is_plural_or_inflection(w, base):
     """True if w looks like an inflected form of a word in base (plural -s/-es, past -ed, -ing)."""
@@ -63,9 +70,10 @@ def is_plural_or_inflection(w, base):
 
 KEEP_INFLECTED = set("""tired fixed naked rated noted dated based added aimed armed cured faced famed fated jaded mixed moved paved posed ruled sized timed tried urged vexed wired bored dazed fried dried eased fazed hired lined mined owned paced paged piped raged razed sided toned tuned typed waved wiped zoned""".split())
 KEEP_S = set("""teeth women chess glass grass dress press cross bless bliss gloss floss brass class mass moss boss loss toss fuss truss abyss amiss basis oasis bonus focus virus minus lotus nexus sinus opus ethos chaos civics""".split())
-KEEP_S = set(w for w in KEEP_S if len(w) == L)
+KEEP_S_ALL = set(KEEP_S)
 
 def build_english():
+    MODERN = set(w for w in MODERN_ALL if len(w) == L); KEEP_S = set(w for w in KEEP_S_ALL if len(w) == L); REGIONAL = set(w for w in REGIONAL_ALL if len(w) == L)
     freq = [w for w in top_n_list('en', 300000) if len(w) == L and w.isalpha() and w.islower()]
     base_vocab = WEB2 | MODERN
     answers, guesses = [], []
@@ -99,14 +107,14 @@ def build_english():
 def looks_like_noise(w):
     return bool(re.search(r'(.)\1\1', w)) or 'haha' in w or 'hehe' in w
 
-def build_wordfreq_only(lang, english_guesses, min_zipf_answer=3.5, min_zipf_guess=2.6, max_answers=700):
+def build_wordfreq_only(lang, english_guesses, min_zipf_answer=3.5, min_zipf_guess=2.6, max_answers=450):
     """Languages without a system dictionary: frequency only, with English collisions removed."""
     en = set(english_guesses)
     words = [w for w in top_n_list(lang, 200000) if len(w) == L and w.isalpha() and w.islower()]
     answers, guesses = [], []
     for w in words:
         z = zipf_frequency(w, lang)
-        if w in en or w in PROPER or w in BLOCK_ALL or w in JUNK or looks_like_noise(w): continue
+        if w in en or w in PROPER or w in BLOCK_ALL or w in JUNK or w in LOCAL_NAMES or looks_like_noise(w): continue
         ze = zipf_frequency(w, 'en')
         if ze >= z or ze >= 2.8: continue      # more English than local, or a name/brand seen in English text
         if z >= min_zipf_guess: guesses.append(w)
@@ -164,24 +172,32 @@ def write(pack):
     print(f"{pack['id']}: {len(pack['answers'].split())} answers, {len(pack['guesses'].split())} guesses, {os.path.getsize(path)//1024} KB")
 
 def main():
+    global L
     os.makedirs(OUT, exist_ok=True)
+    KB = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm']
+    # Daily pack: English, five letters.
+    L = 5
     en_a, en_g = build_english()
     openers = best_openers(en_a)
     print('en openers', openers)
-    en = dict(id='en', name='English', language='en', version=2, wordLength=L,
-              alphabet='abcdefghijklmnopqrstuvwxyz', keyboard=['qwertyuiop', 'asdfghjkl', 'zxcvbnm'],
-              epoch=EPOCH, dailyPool=1200, answers=' '.join(en_a), guesses=' '.join(en_g), difficulty=difficulty(en_a, openers))
-    write(en)
-    manifest = [dict(id='en', name='English', language='en', file='packs/en.json')]
-    for lang, name in [('ms', 'Bahasa Melayu'), ('id', 'Bahasa Indonesia'), ('fil', 'Filipino')]:
+    write(dict(id='en', name='English', language='en', version=3, wordLength=5, alphabet='abcdefghijklmnopqrstuvwxyz', keyboard=KB,
+               epoch=EPOCH, dailyPool=1200, answers=' '.join(en_a), guesses=' '.join(en_g), difficulty=difficulty(en_a, openers)))
+    manifest = [dict(id='en', name='English', short='English', language='en', file='packs/en.json', daily=True)]
+    # Easy pack: English, four letters, practice only.
+    L = 4
+    ez_a, ez_g = build_english()
+    ez_a = ez_a[:900]
+    write(dict(id='en-easy', name='Easy (4 letters)', language='en', version=1, wordLength=4, alphabet='abcdefghijklmnopqrstuvwxyz', keyboard=KB,
+               epoch=EPOCH, answers=' '.join(ez_a), guesses=' '.join([w for w in ez_g if w not in set(ez_a)]), difficulty=difficulty(ez_a, best_openers(ez_a))))
+    manifest.append(dict(id='en-easy', name='Easy (4 letters)', short='Easy', language='en', file='packs/en-easy.json', practiceOnly=True))
+    # Beta language packs: five letters, practice only.
+    L = 5
+    for lang, name, short in [('ms', 'Bahasa Melayu', 'Melayu'), ('id', 'Bahasa Indonesia', 'Indonesia'), ('fil', 'Filipino', 'Filipino')]:
         a, g = build_wordfreq_only(lang, en_g + en_a)
-        if len(a) < 400: print(f'{lang}: only {len(a)} answers, skipped'); continue
-        ops = best_openers(a)
-        pack = dict(id=lang, name=name, language=lang, version=1, wordLength=L, beta=True,
-                    alphabet='abcdefghijklmnopqrstuvwxyz', keyboard=['qwertyuiop', 'asdfghjkl', 'zxcvbnm'],
-                    epoch=EPOCH, dailyPool=450, answers=' '.join(a), guesses=' '.join(g), difficulty=difficulty(a, ops))
-        write(pack)
-        manifest.append(dict(id=lang, name=name, language=lang, file=f'packs/{lang}.json', beta=True))
+        if len(a) < 300: print(f'{lang}: only {len(a)} answers, skipped'); continue
+        write(dict(id=lang, name=name, language=lang, version=2, wordLength=5, beta=True, alphabet='abcdefghijklmnopqrstuvwxyz', keyboard=KB,
+                   epoch=EPOCH, answers=' '.join(a), guesses=' '.join(g), difficulty=difficulty(a, best_openers(a))))
+        manifest.append(dict(id=lang, name=name, short=short, language=lang, file=f'packs/{lang}.json', beta=True, practiceOnly=True))
     with open(os.path.join(OUT, 'index.json'), 'w', encoding='utf-8') as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
     print('manifest', [m['id'] for m in manifest])

@@ -2,28 +2,44 @@
   {
     "id": "en",
     "name": "English",
+    "short": "English",
     "language": "en",
-    "file": "packs/en.json"
+    "file": "packs/en.json",
+    "daily": true
+  },
+  {
+    "id": "en-easy",
+    "name": "Easy (4 letters)",
+    "short": "Easy",
+    "language": "en",
+    "file": "packs/en-easy.json",
+    "practiceOnly": true
   },
   {
     "id": "ms",
     "name": "Bahasa Melayu",
+    "short": "Melayu",
     "language": "ms",
     "file": "packs/ms.json",
-    "beta": true
+    "beta": true,
+    "practiceOnly": true
   },
   {
     "id": "id",
     "name": "Bahasa Indonesia",
+    "short": "Indonesia",
     "language": "id",
     "file": "packs/id.json",
-    "beta": true
+    "beta": true,
+    "practiceOnly": true
   },
   {
     "id": "fil",
     "name": "Filipino",
+    "short": "Filipino",
     "language": "fil",
     "file": "packs/fil.json",
-    "beta": true
+    "beta": true,
+    "practiceOnly": true
   }
 ]

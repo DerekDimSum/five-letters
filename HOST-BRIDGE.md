@@ -66,7 +66,8 @@ them to the console.
 
 - `fiveletters.pack` — the chosen word list id.
 - `fiveletters.settings` — settings shared across word lists.
-- `fiveletters.<packId>` — that list's games, archive and stats. Versioned by a `schema` field.
+- `fiveletters.<dailyPackId>` — the daily pack's games, archive, stats and practice games for
+  every practice list (`practiceGames`, keyed by pack id). Versioned by a `schema` field.
 
 Keys are plain strings; values are JSON strings. The host can namespace them per user.
 

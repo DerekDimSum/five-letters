@@ -55,10 +55,11 @@ look gamed, put the route behind Vercel's firewall rules or add a per-IP cap.
 
 ## Word packs
 
-Packs live in `packs/<id>.json` and are listed in `packs/index.json`; players pick one in
-settings. English is built from common words validated against the macOS dictionary. Malay,
-Indonesian and Filipino are frequency-only lists marked **beta** until a native speaker reviews
-them. To rebuild:
+Packs live in `packs/<id>.json` and are listed in `packs/index.json`. The pack flagged `daily`
+(English) is the one everyone plays each day. The others are practice lists, chosen with the
+chips above the grid in practice mode: Easy (four letters), and beta Malay, Indonesian and
+Filipino lists built from frequency data until a native speaker reviews them. Each practice
+list keeps its own in-progress game. To rebuild:
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install wordfreq && .venv/bin/python scripts/build-packs.py
@@ -93,7 +94,10 @@ the full URL. The function already sends permissive CORS headers.
   or the Web Share API, with text and clipboard fallbacks.
 - End screen shows the word's meaning, a one-line insight about how the solve went, streak
   milestones and personal bests, and confetti scaled to how fast the solve was.
-- Daily words come from the most common part of each list (`dailyPool`); practice uses all of
+- Daily words come from the most common part of the list (`dailyPool`); practice uses all of
   it. British, Singlish, Australian and Indian English spellings are accepted as guesses.
+- Practice lists: Easy (four letters) and beta Malay, Indonesian and Filipino, with definitions
+  from Wiktionary for the three languages. Daily stays English only.
+- Larger text setting; comparison copy varies by puzzle; streak tile shows banked freezes.
 - Accessible: reveals are announced to screen readers, keys describe their state, sheets trap
   and restore focus.
