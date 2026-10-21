@@ -28,7 +28,7 @@
   --font-display: 'Outfit', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --radius: 12px;
-  --tile: clamp(38px, min(62px, (100vw - 60px) / 5, (100dvh - 320px) / 6), 62px);
+  --tile: clamp(38px, min(62px, (100vw - 60px) / 5, (100dvh - 350px) / 6), 62px);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -82,7 +82,19 @@ header {
 .icon-btn.active { color: var(--accent); }
 .icon-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-main { flex: 1 1 auto; display: grid; place-items: center; min-height: 0; padding-block: 8px; }
+main { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: 0; padding-block: 8px; }
+.coach { text-align: center; color: var(--muted); font-size: 0.9rem; min-height: 1.4em; animation: fadein 300ms ease; }
+.coach.legend { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; font-size: 0.82rem; }
+.coach.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.coach.legend i { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+.coach.legend i.correct { background: var(--correct); } .coach.legend i.present { background: var(--present); } .coach.legend i.absent { background: var(--absent); }
+@keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.summary div { text-align: center; padding: 12px 8px; border: 1px solid var(--line); border-radius: 12px; }
+.summary b { display: block; font: 700 1.5rem var(--font-display); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.summary span { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.linkbtn { display: block; width: 100%; text-align: center; margin-top: 14px; color: var(--accent); font-weight: 600; padding: 8px; }
+.ios-haptic { position: fixed; left: -9999px; top: 0; width: 1px; height: 1px; overflow: hidden; opacity: 0.01; pointer-events: none; }
 .board { display: grid; grid-template-rows: repeat(6, var(--tile)); gap: 5px; touch-action: pan-y; }
 .row { display: grid; grid-template-columns: repeat(5, var(--tile)); gap: 5px; }
 .tile {
@@ -207,6 +219,7 @@ main { flex: 1 1 auto; display: grid; place-items: center; min-height: 0; paddin
 .help strong { font-weight: 700; }
 
 @media (prefers-reduced-motion: reduce) {
+  .coach { animation: none; }
   .tile.reveal { animation: none; background: var(--tile-bg); color: var(--tile-fg); border-color: var(--tile-line); }
   .tile.pop, .tile.bounce, .row.shake, .panel { animation: none; }
   .toast { transition: none; }
@@ -231,6 +244,7 @@ main { flex: 1 1 auto; display: grid; place-items: center; min-height: 0; paddin
 
   <main>
     <div class="board" id="board" role="grid" aria-label="Guess grid"></div>
+    <div class="coach" id="coach" hidden></div>
   </main>
 
   <div class="unused" id="unused" hidden></div>
@@ -250,6 +264,11 @@ main { flex: 1 1 auto; display: grid; place-items: center; min-height: 0; paddin
     <p class="source" id="resultSource"></p>
       <p class="note" id="resultNote" hidden></p>
     </div>
+    <div class="summary" id="resultSummary" hidden>
+      <div><b id="rStreak">0</b><span>Day streak</span></div>
+      <div><b id="rNext">00:00</b><span>Next word</span></div>
+    </div>
+    <div id="statsFull">
     <h2 id="statsTitle" class="stats-heading">Statistics</h2>
     <p class="note" id="statsScope"></p>
     <div class="statgrid" style="margin-top:12px">
@@ -264,11 +283,12 @@ main { flex: 1 1 auto; display: grid; place-items: center; min-height: 0; paddin
       <svg viewBox="0 0 24 24"><path d="M12 2v20M4 6l16 12M4 18L20 6M12 2l-3 3M12 2l3 3M12 22l-3-3M12 22l3-3"/></svg>
       <span id="freezeText"></span>
     </div>
+    </div>
     <div class="actions">
       <button class="btn primary" id="btnShare"><svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 15V3M8 7l4-4 4 4"/></svg><span>Share</span></button>
       <button class="btn" id="btnPlayPractice">Practice word</button>
     </div>
-    <p class="countdown" id="countdown" hidden>Next word in <b id="countdownTime">00:00:00</b></p>
+    <button class="linkbtn" id="btnMoreStats" hidden>Show my stats</button>
   </div>
 </div>
 
@@ -279,6 +299,10 @@ main { flex: 1 1 auto; display: grid; place-items: center; min-height: 0; paddin
     <div class="setting">
       <div class="label"><span>Hard mode</span><small id="hardHint">Revealed hints must be used in later guesses. Eliminated letters are locked.</small></div>
       <label class="switch"><input type="checkbox" id="optHard" aria-label="Hard mode"><i></i></label>
+    </div>
+    <div class="setting">
+      <div class="label"><span>Haptics</span><small>A light tap on each key, a buzz on mistakes.</small></div>
+      <label class="switch"><input type="checkbox" id="optHaptics" aria-label="Haptics"><i></i></label>
     </div>
     <div class="setting">
       <div class="label"><span>High contrast</span><small>Orange and blue tiles for colour-blind players.</small></div>
@@ -316,7 +340,7 @@ main { flex: 1 1 auto; display: grid; place-items: center; min-height: 0; paddin
   <div class="panel help" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
     <button class="icon-btn close" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2 id="helpTitle">How to play</h2>
-    <p>Guess the word in six tries. Each guess must be a real five-letter word. The tiles change colour to show how close you were.</p>
+    <p>Guess the five-letter word in six tries.</p>
     <div class="example"><div class="tile revealed correct">s</div><div class="tile revealed">t</div><div class="tile revealed">o</div><div class="tile revealed">r</div><div class="tile revealed">m</div></div>
     <p><strong>S</strong> is in the word and in the right spot.</p>
     <div class="example"><div class="tile revealed">p</div><div class="tile revealed present">l</div><div class="tile revealed">a</div><div class="tile revealed">n</div><div class="tile revealed">t</div></div>
@@ -324,8 +348,9 @@ main { flex: 1 1 auto; display: grid; place-items: center; min-height: 0; paddin
     <div class="example"><div class="tile revealed">c</div><div class="tile revealed">r</div><div class="tile revealed">a</div><div class="tile revealed absent">n</div><div class="tile revealed">e</div></div>
     <p><strong>N</strong> is not in the word anywhere.</p>
     <h3>Shortcuts</h3>
-    <p>Tap a filled tile to change that letter. Swipe left on the grid to clear the row. Hold backspace to clear quickly.</p>
-    <p>A new word arrives every day at midnight. Finish it to keep your streak, and earn a streak freeze every seven days you play.</p>
+    <p>Tap a filled tile to change that letter. Swipe left on the grid to clear the row. Hold backspace to delete quickly.</p>
+    <h3>Streaks</h3>
+    <p>A new word arrives at midnight. Solve it each day to build a streak. Every seven daily games earns a streak freeze that covers one missed day.</p>
   </div>
 </div>
 
@@ -358,12 +383,21 @@ const Host = {
     get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
   },
+  hapticsEnabled: true,
+  // kind: 'tap' (keys, tiles), 'tick' (a reveal landing), 'error' (rejected guess, loss), 'success' (win)
   haptic(kind) {
+    if (!Host.hapticsEnabled) return;
     try {
-      if (!navigator.vibrate) return;
-      if (kind === 'error') navigator.vibrate([30, 40, 30]);
-      else if (kind === 'success') navigator.vibrate([20, 40, 20, 40, 60]);
-      else navigator.vibrate(8);
+      // 1. Super app bridge, when the host injects one.
+      const bridge = window.FiveLettersHost;
+      if (bridge && typeof bridge.haptic === 'function') { bridge.haptic(kind); return; }
+      // 2. Vibration API (Android browsers and WebViews).
+      if (typeof navigator.vibrate === 'function' && /Android/i.test(navigator.userAgent)) {
+        navigator.vibrate(kind === 'error' ? [30, 40, 30] : kind === 'success' ? [20, 40, 20, 40, 60] : kind === 'tick' ? 12 : 6);
+        return;
+      }
+      // 3. iOS Safari 17.4+: toggling a switch-style checkbox inside a user gesture plays the system tap.
+      iosHaptic(kind);
     } catch (e) {}
   },
   async share(text) {
@@ -381,6 +415,18 @@ const Host = {
   },
   now() { return new Date(); },
 };
+
+let iosSwitch = null;
+function iosHaptic(kind) {
+  if (!/iPhone|iPad|iPod/.test(navigator.userAgent) && !(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return;
+  if (!iosSwitch) {
+    const label = document.createElement('label'); label.className = 'ios-haptic'; label.setAttribute('aria-hidden', 'true');
+    const input = document.createElement('input'); input.type = 'checkbox'; input.setAttribute('switch', ''); input.tabIndex = -1;
+    label.appendChild(input); document.body.appendChild(label); iosSwitch = label;
+  }
+  const times = kind === 'error' ? 2 : kind === 'success' ? 3 : 1;
+  for (let i = 0; i < times; i++) setTimeout(() => iosSwitch.click(), i * 90);
+}
 
 /* ---------- Word pack ---------- */
 function hashStr(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
@@ -450,8 +496,9 @@ function emptyStats() { return { played: 0, won: 0, streak: 0, maxStreak: 0, dis
 function defaultStore() {
   return {
     schema: SCHEMA,
-    settings: { hardMode: false, contrast: false, theme: 'system', unused: false },
+    settings: { hardMode: false, contrast: false, theme: 'system', unused: false, haptics: true },
     seenHelp: false,
+    firstEndSeen: false,
     daily: { puzzle: null, guesses: [], current: '', status: 'playing', hardMode: false, reported: false, live: null },
     archive: {},
     practice: { answer: null, guesses: [], current: '', status: 'playing', hardMode: false },
@@ -622,6 +669,7 @@ function render(restored) {
     const k = keyEls[id]; if (id === 'enter' || id === 'backspace') continue;
     k.className = 'key' + (ks[id] ? ' ' + ks[id] : '') + (ks[id] === 'absent' && game.hardMode ? ' locked' : '');
   }
+  renderCoach(ks);
   const un = document.getElementById('unused');
   un.hidden = !store.settings.unused;
   if (store.settings.unused) {
@@ -631,10 +679,23 @@ function render(restored) {
   void rm;
 }
 
+function finishedAnyGame() { return (store.stats.daily.played + store.stats.practice.played) > 0; }
+function renderCoach() {
+  const c = document.getElementById('coach');
+  if (finishedAnyGame() || game.status !== 'playing') { c.hidden = true; return; }
+  if (game.guesses.length === 0) {
+    c.hidden = game.current.length > 0; c.className = 'coach';
+    c.textContent = `Guess the ${['','','','','four','five','six','seven','eight'][L]}-letter word in ${ROWS} tries.`;
+  } else {
+    c.hidden = false; c.className = 'coach legend';
+    c.innerHTML = '<span><i class="correct"></i>Right spot</span><span><i class="present"></i>Wrong spot</span><span><i class="absent"></i>Not in word</span>';
+  }
+}
+
 /* ---------- Input ---------- */
 function handleKey(k) {
   if (busy || sheetOpen()) return;
-  if (game.status !== 'playing') { if (k === 'enter') openStats(); return; }
+  if (game.status !== 'playing') { if (k === 'enter') openStats(false); return; }
   if (k === 'enter') return submit();
   if (k === 'backspace') {
     if (!game.current) return;
@@ -654,7 +715,7 @@ function handleKey(k) {
 function onTileTap(r, c) {
   if (busy || game.status !== 'playing' || r !== game.guesses.length) return;
   if (!game.current[c]) { cursor = null; render(); return; }
-  cursor = cursor === c ? null : c; render();
+  cursor = cursor === c ? null : c; Host.haptic('tap'); render();
 }
 function clearRow() {
   if (busy || game.status !== 'playing' || !game.current) return;
@@ -679,17 +740,18 @@ function submit() {
   const wait = rm ? 60 : (L - 1) * 140 + 560;
   setTimeout(() => {
     busy = false; render();
+    if (!won && game.status === 'playing') Host.haptic('tick');
     if (won) {
       Host.haptic('success');
       if (!rm) tiles[r].forEach(t => t.classList.add('bounce'));
       toast(WIN_WORDS[r], 1800);
       finishGame(true, r + 1);
-      setTimeout(openStats, 1900);
+      setTimeout(() => openStats(false), 1900);
     } else if (game.status === 'lost') {
       Host.haptic('error');
       toast(game.answer.toUpperCase(), 2200);
       finishGame(false, 0);
-      setTimeout(openStats, 2200);
+      setTimeout(() => openStats(false), 2200);
     }
   }, wait);
 }
@@ -780,7 +842,8 @@ function closeSheets() { Object.values(sheets).forEach(s => s.hidden = true); cl
 Object.values(sheets).forEach(s => {
   s.addEventListener('click', (e) => { if (e.target === s || e.target.closest('[data-close]')) closeSheets(); });
 });
-document.getElementById('btnStats').addEventListener('click', openStats);
+document.getElementById('btnStats').addEventListener('click', () => openStats(true));
+document.getElementById('btnMoreStats').addEventListener('click', () => { document.getElementById('statsFull').hidden = false; document.getElementById('btnMoreStats').hidden = true; });
 document.getElementById('btnSettings').addEventListener('click', openSettings);
 document.getElementById('btnHelp').addEventListener('click', () => { closeSheets(); sheets.help.hidden = false; });
 document.getElementById('btnPractice').addEventListener('click', () => { closeSheets(); setMode(mode === 'practice' ? 'daily' : 'practice', false); toast(mode === 'practice' ? 'Practice mode. Your daily streak is safe here.' : `Back to today's puzzle`); });
@@ -807,18 +870,25 @@ document.getElementById('btnShare').addEventListener('click', async () => {
 });
 
 let cdTimer = null;
-function openStats() {
+function openStats(full) {
   closeSheets();
   const st = mode === 'practice' ? store.stats.practice : store.stats.daily;
   const done = game.status !== 'playing';
+  const compact = done && !full;
+  document.getElementById('statsFull').hidden = compact;
+  document.getElementById('btnMoreStats').hidden = !compact;
   const rb = document.getElementById('resultBlock'); rb.hidden = !done;
   if (done) {
     const n = game.guesses.length, won = game.status === 'won';
     document.getElementById('resultEyebrow').textContent = mode === 'daily' ? `Puzzle #${game.puzzle}` : mode === 'archive' ? `Archive #${game.puzzle} · ${puzzleDate(game.puzzle)}` : 'Practice';
     document.getElementById('resultTitle').textContent = won ? (n === 1 ? 'Solved in 1' : `Solved in ${n}`) : 'Not this time';
     document.getElementById('resultAnswer').hidden = won; document.getElementById('resultWord').textContent = game.answer;
-    const note = document.getElementById('resultNote'); note.hidden = !(mode === 'daily' && lastNote); note.textContent = lastNote;
+    let noteText = mode === 'daily' ? lastNote : '';
+    if (mode === 'daily' && !store.firstEndSeen) { store.firstEndSeen = true; save(); noteText = (noteText ? noteText + ' ' : '') + (won ? 'A new word arrives at midnight. Come back tomorrow to keep the streak going.' : 'A new word arrives at midnight. Tomorrow is a fresh start.'); }
+    const note = document.getElementById('resultNote'); note.hidden = !noteText; note.textContent = noteText;
   }
+  const sum = document.getElementById('resultSummary'); sum.hidden = !(done && mode === 'daily');
+  if (!sum.hidden) document.getElementById('rStreak').textContent = effectiveStreak();
   document.getElementById('statsScope').textContent = mode === 'practice' ? 'Practice words (kept separate from your daily streak)' : 'Daily puzzles';
   document.getElementById('sPlayed').textContent = st.played;
   document.getElementById('sWin').textContent = st.played ? Math.round(100 * st.won / st.played) : 0;
@@ -839,8 +909,7 @@ function openStats() {
   }
   document.getElementById('btnShare').hidden = !done;
   document.getElementById('btnPlayPractice').textContent = mode === 'practice' ? 'New practice word' : 'Practice word';
-  const cd = document.getElementById('countdown'); cd.hidden = !(mode === 'daily' && done);
-  if (!cd.hidden) { tickCountdown(); cdTimer = setInterval(tickCountdown, 1000); }
+  if (!sum.hidden) { tickCountdown(); cdTimer = setInterval(tickCountdown, 1000); }
   sheets.stats.hidden = false;
   if (done) {
     refreshCompare();
@@ -853,8 +922,8 @@ function openStats() {
 }
 function tickCountdown() {
   const now = Host.now(); const next = localMidnight(now) + 86400000; let s = Math.max(0, Math.floor((next - now.getTime()) / 1000));
-  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); s = s % 60;
-  document.getElementById('countdownTime').textContent = [h, m, s].map(x => String(x).padStart(2, '0')).join(':');
+  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60);
+  document.getElementById('rNext').textContent = h > 0 ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m ${String(s % 60).padStart(2, '0')}s`;
   if (next - now.getTime() <= 0) { closeSheets(); setMode('daily', false); toast('A new word is ready'); }
 }
 function shareText() {
@@ -870,13 +939,13 @@ function shareText() {
 }
 
 /* ---------- Settings ---------- */
-const optHard = document.getElementById('optHard'), optContrast = document.getElementById('optContrast'), optUnused = document.getElementById('optUnused');
+const optHard = document.getElementById('optHard'), optContrast = document.getElementById('optContrast'), optUnused = document.getElementById('optUnused'), optHaptics = document.getElementById('optHaptics');
 function openSettings() {
   closeSheets();
   const midGame = game.status === 'playing' && game.guesses.length > 0;
   optHard.checked = game.hardMode; optHard.disabled = midGame && !game.hardMode;
   document.getElementById('hardHint').textContent = midGame && !game.hardMode ? 'Can only be switched on at the start of a round.' : 'Revealed hints must be used in later guesses. Eliminated letters are locked.';
-  optContrast.checked = store.settings.contrast; optUnused.checked = store.settings.unused;
+  optContrast.checked = store.settings.contrast; optUnused.checked = store.settings.unused; optHaptics.checked = store.settings.haptics !== false;
   document.querySelectorAll('#themeSeg button').forEach(b => b.classList.toggle('on', b.dataset.themeOpt === store.settings.theme));
   document.getElementById('packInfo').textContent = `${PACK.name} · ${PACK.order.length.toLocaleString()} answers, ${(PACK.order.length + PACK.extraCount).toLocaleString()} accepted words · v${PACK.version}`;
   sheets.settings.hidden = false;
@@ -887,6 +956,7 @@ optHard.addEventListener('change', () => {
 });
 optContrast.addEventListener('change', () => { store.settings.contrast = optContrast.checked; save(); applyTheme(); });
 optUnused.addEventListener('change', () => { store.settings.unused = optUnused.checked; save(); render(); });
+optHaptics.addEventListener('change', () => { store.settings.haptics = optHaptics.checked; Host.hapticsEnabled = optHaptics.checked; save(); if (optHaptics.checked) Host.haptic('tap'); });
 document.getElementById('themeSeg').addEventListener('click', (e) => {
   const b = e.target.closest('button'); if (!b) return;
   store.settings.theme = b.dataset.themeOpt; save(); applyTheme();
@@ -925,9 +995,9 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden && mo
 
 /* ---------- Boot ---------- */
 applyTheme();
+Host.hapticsEnabled = store.settings.haptics !== false;
 setMode('daily', false);
-if (!store.seenHelp) { store.seenHelp = true; save(); sheets.help.hidden = false; }
-else if (game.status !== 'playing') { setTimeout(openStats, 300); }
+if (game.status !== 'playing') setTimeout(() => openStats(false), 300);
 })();
 </script>
 </body>

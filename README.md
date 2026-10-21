@@ -57,7 +57,13 @@ The game ships with a small placeholder pack. Replace the JSON inside
 
 Everything that touches the outside world goes through the `Host` object at the top of the
 script in `index.html`: storage, haptics, share and the clock. Replace those four methods with
-the host's JS bridge calls and nothing else changes. Theme follows the system by default and
+the host's JS bridge calls and nothing else changes.
+
+Haptics already look for a bridge before falling back: if the host injects
+`window.FiveLettersHost = { haptic(kind) {...} }` the game calls it with `tap`, `tick`, `error`
+or `success`. Without a bridge it uses the Vibration API on Android and, on iOS Safari 17.4+,
+the system tap that toggling a switch-style checkbox produces. Players can turn haptics off in
+settings. Theme follows the system by default and
 can be forced with `data-theme="light|dark"` on the root element.
 
 If the game is served from a different origin than the API, set `STATS_API` in `index.html` to
@@ -74,3 +80,5 @@ the full URL. The function already sends permissive CORS headers.
   estimate otherwise. Share card via native share sheet or clipboard.
 - Tap a tile to edit it, swipe left to clear the row, hold backspace to delete fast, optional
   unused-letters strip.
+- No onboarding popup. A one-line hint under the empty grid, a colour legend after the first
+  reveal, and one sentence on the first end screen; each shows once.
