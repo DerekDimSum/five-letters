@@ -424,8 +424,10 @@ function iosHaptic(kind) {
     const input = document.createElement('input'); input.type = 'checkbox'; input.setAttribute('switch', ''); input.tabIndex = -1;
     label.appendChild(input); document.body.appendChild(label); iosSwitch = label;
   }
-  const times = kind === 'error' ? 2 : kind === 'success' ? 3 : 1;
-  for (let i = 0; i < times; i++) setTimeout(() => iosSwitch.click(), i * 90);
+  // The first toggle must run synchronously inside the user's tap, or iOS drops it.
+  iosSwitch.click();
+  const extra = kind === 'error' ? 1 : kind === 'success' ? 2 : 0;
+  for (let i = 1; i <= extra; i++) setTimeout(() => iosSwitch.click(), i * 90);
 }
 
 /* ---------- Word pack ---------- */
