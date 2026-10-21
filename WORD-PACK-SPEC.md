@@ -41,7 +41,8 @@ the schema below and be added to the manifest.
 | `alphabet` | yes | Every letter that may appear in any word, lowercase, in the order you want the hard-mode "letters left" list to use. Must cover every character in `answers` and `guesses`. |
 | `keyboard` | yes | Two to four strings, one per row. Must contain every letter in `alphabet` exactly once. The game adds Enter and Backspace to the last row. |
 | `epoch` | yes | `YYYY-MM-DD`, the date of puzzle #1 in the player's local time. |
-| `answers` | yes | The pool a daily word is drawn from. |
+| `answers` | yes | The pool a daily word is drawn from, **ordered most common first**. |
+| `dailyPool` | no | Integer. Only the first `dailyPool` answers are used for daily puzzles; practice uses the whole list. Keeps the daily word friendly for non-native speakers while practice stays varied. English uses 1200. |
 | `guesses` | yes | Additional accepted words that are never used as answers. Everything in `answers` is automatically accepted, so do not repeat them here. |
 | `difficulty` | no | Map of answer word to expected number of guesses as a float. If missing, the game estimates difficulty from letter frequency. |
 
@@ -60,8 +61,12 @@ The game accepts all three.
 - No slurs or words that would be unacceptable to show as "the answer was". Use a
   blocklist and apply it to both lists, since a blocked word being accepted as a guess
   is nearly as bad as it being the answer.
-- Order does not matter. The game shuffles `answers` deterministically using `id`, so an
-  alphabetical file is fine and produces a non-alphabetical daily sequence.
+- The game shuffles `answers` deterministically using `id`, so the daily sequence is never
+  alphabetical. Order still matters for `dailyPool`: put the most common words first.
+- Accept regional spellings and vocabulary in `guesses` (British `fibre`, `odour`; Singlish
+  `shiok`, `kiasu`, `chope`; Australian `servo`, `chook`; Indian English `crore`, `dhoti`).
+  Being told your everyday word "is not a word" is the most common complaint from players
+  outside the US.
 
 ## `answers` (the daily pool)
 

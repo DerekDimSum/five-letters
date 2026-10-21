@@ -12,6 +12,7 @@ WebView, with one small serverless function behind it for the "how you compared"
 | `scripts/build-packs.py` | Rebuilds `packs/` from the system dictionary and word-frequency data, with solver-based difficulty scores. |
 | `HOST-BRIDGE.md` | The interface a super app implements: storage, haptics, share, clock, analytics. |
 | `api/stats.js` | Vercel serverless function. Aggregates results per puzzle so the end screen can say "Faster than 62% of players". |
+| `api/define.js` | Serverless function. Returns a one-line definition of the answer (Datamuse, with the Free Dictionary API as fallback), cached at the edge. English only for now. |
 | `scripts/dev-server.js` | Local server that serves the game and runs the API against an in-memory store. |
 | `WORD-PACK-SPEC.md` | Requirements for building real word packs (English and other languages). |
 | `vercel.json` | Clean URLs and a couple of headers. |
@@ -37,7 +38,9 @@ The project is a plain static site plus one function, so Vercel needs no configu
 npx vercel --prod
 ```
 
-### Enable the live comparison line
+Pushing to `main` deploys automatically through the GitHub integration. No CLI needed.
+
+### Enable the live comparison line (optional)
 
 Without a store the API returns 503 and the game silently falls back to its word-difficulty
 estimate, so the deploy works with nothing else. To turn on real numbers:
@@ -88,5 +91,9 @@ the full URL. The function already sends permissive CORS headers.
   reveal, and one sentence on the first end screen; each shows once.
 - Share card: a rendered PNG with the grid, result and comparison line, sent through the host
   or the Web Share API, with text and clipboard fallbacks.
+- End screen shows the word's meaning, a one-line insight about how the solve went, streak
+  milestones and personal bests, and confetti scaled to how fast the solve was.
+- Daily words come from the most common part of each list (`dailyPool`); practice uses all of
+  it. British, Singlish, Australian and Indian English spellings are accepted as guesses.
 - Accessible: reveals are announced to screen readers, keys describe their state, sheets trap
   and restore focus.

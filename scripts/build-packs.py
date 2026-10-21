@@ -32,7 +32,14 @@ PROPER = set(w.lower() for w in web2 if w[:1].isupper()) | FIRST_NAMES
 # Place names and the like that are also common nouns stay as guesses (e.g. "china", "march").
 PROPER -= WEB2
 # First names are never answers, even when the dictionary also lists them lowercase ("benny", "maria").
-NEVER_ANSWER = FIRST_NAMES | set("""norma rowan garth rufus bosch kerry roger twain emery aspen thine mamma hanna benny bobby maria hitler rufus""".split())
+NEVER_ANSWER = FIRST_NAMES | set("""norma rowan garth rufus bosch kerry roger twain emery aspen thine mamma hanna benny bobby maria hitler
+prius faust torah polio hertz brill teeny pubic bosom lupus ebola sarin bible koran quran islam hindu jesus allah satan swiss dutch welsh irish texas""".split())
+# Regional and British spellings accepted as guesses so players across APAC are not told their word "is not a word".
+REGIONAL = set("""fibre litre metre odour mould tyres kerbs ochre sabre mitre aeons lupin storey
+shiok kiasu makan lepak chope bojio walao kopis sabos
+chook telly bogan dunny smoko servo arvos
+crore dhoti sahib lathi""".split())
+REGIONAL = set(w for w in REGIONAL if len(w) == L)
 
 # Slurs and words nobody wants to see as "the answer was". Applied to both lists.
 BLOCK_ALL = set("""nigga negro chink gooks spick spics kikes dykes faggy fagot bitch whore pussy cunts twats wanks cocks dicks shits turds nazis rapes raped rapey""".split())
@@ -79,6 +86,8 @@ def build_english():
             answers.append(w)
     # Fill the guess list with the rest of the dictionary (rare words are fine as guesses).
     seen = set(guesses)
+    for w in sorted(REGIONAL):
+        if w not in seen: guesses.append(w); seen.add(w)
     for w in sorted(WEB2):
         if len(w) == L and w not in seen and w not in BLOCK_ALL and w not in PROPER:
             guesses.append(w); seen.add(w)
@@ -161,7 +170,7 @@ def main():
     print('en openers', openers)
     en = dict(id='en', name='English', language='en', version=2, wordLength=L,
               alphabet='abcdefghijklmnopqrstuvwxyz', keyboard=['qwertyuiop', 'asdfghjkl', 'zxcvbnm'],
-              epoch=EPOCH, answers=' '.join(en_a), guesses=' '.join(en_g), difficulty=difficulty(en_a, openers))
+              epoch=EPOCH, dailyPool=1200, answers=' '.join(en_a), guesses=' '.join(en_g), difficulty=difficulty(en_a, openers))
     write(en)
     manifest = [dict(id='en', name='English', language='en', file='packs/en.json')]
     for lang, name in [('ms', 'Bahasa Melayu'), ('id', 'Bahasa Indonesia'), ('fil', 'Filipino')]:
@@ -170,7 +179,7 @@ def main():
         ops = best_openers(a)
         pack = dict(id=lang, name=name, language=lang, version=1, wordLength=L, beta=True,
                     alphabet='abcdefghijklmnopqrstuvwxyz', keyboard=['qwertyuiop', 'asdfghjkl', 'zxcvbnm'],
-                    epoch=EPOCH, answers=' '.join(a), guesses=' '.join(g), difficulty=difficulty(a, ops))
+                    epoch=EPOCH, dailyPool=450, answers=' '.join(a), guesses=' '.join(g), difficulty=difficulty(a, ops))
         write(pack)
         manifest.append(dict(id=lang, name=name, language=lang, file=f'packs/{lang}.json', beta=True))
     with open(os.path.join(OUT, 'index.json'), 'w', encoding='utf-8') as f:

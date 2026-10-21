@@ -10,6 +10,7 @@ const ROOT = path.join(__dirname, '..');
 process.env.KV_REST_API_URL = `http://127.0.0.1:${PORT}/__fake-redis`;
 process.env.KV_REST_API_TOKEN = 'dev';
 const handler = require(path.join(ROOT, 'api', 'stats.js'));
+const define = require(path.join(ROOT, 'api', 'define.js'));
 
 const hashes = new Map();
 function fakeRedis(cmd) {
@@ -31,6 +32,11 @@ http.createServer(async (req, res) => {
     try { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify({ result: fakeRedis(cmd) })); }
     catch (e) { res.statusCode = 400; res.end(JSON.stringify({ error: e.message })); }
     return;
+  }
+  if (url.pathname === '/api/define') {
+    const vreq = { method: req.method, query: Object.fromEntries(url.searchParams) };
+    const vres = { status(c) { res.statusCode = c; return vres; }, setHeader: (k, v) => res.setHeader(k, v), json(o) { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(o)); }, end: () => res.end() };
+    return define(vreq, vres);
   }
   if (url.pathname === '/api/stats') {
     const raw = await readBody(req);
